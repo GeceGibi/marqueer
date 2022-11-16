@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 
@@ -26,8 +28,6 @@ class AppHome extends StatefulWidget {
 }
 
 class _AppHomeState extends State<AppHome> {
-  final controller = MarqueeController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,75 +35,76 @@ class _AppHomeState extends State<AppHome> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 20),
         children: [
-          SizedBox(
-            height: 30,
-            child: Marquee(
-              pps: 100,
-              controller: controller,
-              onChangeItemInViewPort: (index) {
-                print('item index: $index');
-              },
-              onInteraction: () {
-                print('on interaction callback');
-              },
-              onStarted: () {
-                print('on started callback');
-              },
-              onStoped: () {
-                print('on stopped callback');
-              },
-              child: const Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer pretium massa mollis lorem blandit imperdiet. Nulla mattis vitae mauris vel condimentum. Nam posuere, augue vitae lobortis consequat, odio ante condimentum est, at maximus augue purus id metus. Curabitur condimentum aliquet ante at aliquet. Quisque vel massa congue, bibendum leo sodales, malesuada ante. Maecenas sed tortor quis ipsum dictum sollicitudin.',
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 30,
-            child: Marquee(
-              interaction: false,
-              controller: controller,
-              direction: MarqueeDirection.rtl,
-              child: const Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer pretium massa mollis lorem blandit imperdiet. Nulla mattis vitae mauris vel condimentum. Nam posuere, augue vitae lobortis consequat, odio ante condimentum est, at maximus augue purus id metus. Curabitur condimentum aliquet ante at aliquet. Quisque vel massa congue, bibendum leo sodales, malesuada ante. Maecenas sed tortor quis ipsum dictum sollicitudin.',
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 160,
-            child: Marquee(
-              pps: 60,
-              controller: controller,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 10,
-                itemBuilder: (_, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Image.network(
-                      'https://picsum.photos/id/$index/100/160',
-                      width: 100,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              TextButton(
-                onPressed: controller.stop,
-                child: const Text('Stop'),
-              ),
-              TextButton(
-                onPressed: controller.start,
-                child: const Text('Start'),
-              ),
-            ],
-          )
+          _PostCard(),
         ],
       ),
+    );
+  }
+}
+
+class _PostCard extends StatefulWidget {
+  const _PostCard({super.key});
+  @override
+  State<_PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<_PostCard> {
+  final controller = MarqueeController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(seconds: 2), controller.start);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        LayoutBuilder(builder: (context, conts) {
+          return SizedBox(
+            height: conts.maxWidth,
+            width: conts.maxWidth,
+            child: Image.network(
+              'https://images.pexels.com/photos/9968493/pexels-photo-9968493.jpeg?auto=compress&cs=tinysrgb&w=${conts.maxWidth}&h=${conts.maxWidth}&dpr=2',
+              fit: BoxFit.cover,
+            ),
+          );
+        }),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: ClipRRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+              child: ColoredBox(
+                color: const Color(0xaa000000),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: SizedBox(
+                    height: 16,
+                    child: Marquee(
+                      controller: controller,
+                      autoStart: false,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          "Curabitur nec ex auctor risus scelerisque rhoncus ut porttitor sapien. Pellentesque vestibulum leo a nisi sollicitudin vehicula. Ut fringilla elementum iaculis. Sed risus justo, facilisis at metus sed, interdum euismod lectus. Vivamus tincidunt lorem vel mauris hendrerit, a efficitur felis porttitor. Nulla facilisi.",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

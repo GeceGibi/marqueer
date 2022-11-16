@@ -1,6 +1,7 @@
 library marquee;
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -36,6 +37,7 @@ class Marquee extends StatefulWidget {
   const Marquee({
     required this.child,
     this.pps = 15.0,
+    this.autoStart = true,
     this.direction = MarqueeDirection.ltr,
     this.interaction = true,
     this.initialOffset = 0.0,
@@ -70,7 +72,11 @@ class Marquee extends StatefulWidget {
   /// Restart delay
   final Duration restartAfterInteractionDuration;
 
+  /// Controller
   final MarqueeController? controller;
+
+  /// auto start
+  final bool autoStart;
 
   /// callbacks
   final void Function()? onStarted;
@@ -88,12 +94,11 @@ class _MarqueeState extends State<Marquee> {
   );
 
   late var offset = controller.initialScrollOffset;
-  late final step = MediaQuery.of(context).size.width * 10;
-
-  Duration get duration => Duration(seconds: step ~/ widget.pps);
+  final step = 10000.0;
 
   Timer? timerLoop;
   Timer? timerInteraction;
+  Duration get duration => Duration(seconds: step ~/ widget.pps);
 
   var animating = false;
 
@@ -133,16 +138,8 @@ class _MarqueeState extends State<Marquee> {
     widget.onStoped?.call();
   }
 
-  void onPointerDownHandler(PointerDownEvent event) {
-    animating = false;
-    widget.onInteraction?.call();
-  }
-
   void onPointerUpHandler(PointerUpEvent event) {
     if (widget.restartAfterInteraction) {
-      /// Clear prev timer if setted
-      timerInteraction?.cancel();
-
       /// Wait for scroll animation end
       timerInteraction = Timer(widget.restartAfterInteractionDuration, () {
         offset = controller.offset;
@@ -151,14 +148,24 @@ class _MarqueeState extends State<Marquee> {
     }
   }
 
+  void onPointerDownHandler(PointerDownEvent event) {
+    animating = false;
+    widget.onInteraction?.call();
+
+    /// Clear prev timer if setted
+    timerInteraction?.cancel();
+  }
+
   @override
   void initState() {
     super.initState();
+    widget.controller?._attach(this);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.controller?._attach(this);
-      start();
-    });
+    if (widget.autoStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        start();
+      });
+    }
   }
 
   @override

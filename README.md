@@ -11,29 +11,62 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+Transform to "Marquee" from any widget.
 
-## Features
+## Marquee
+| Argument                        | Type                     | Description      | Required | Default              |
+| ------------------------------- |------------------------  | ---------------- | -------- | -------------------- |
+| child                           | Widget                   |                  | YES      | -                    |
+| pps                             | double                   | Pixel Per Second | NO       | 15.0                 |
+| initialOffset                   | double                   | Starter point    | NO       | 0.0                  |
+| direction                       | enum (MarqueeDirection)  |                  | NO       | MarqueeDirection.ltr |
+| interaction                     | bool                     |                  | NO       | true                 |
+| autoStart                       | bool                     |                  | NO       | true                 |
+| restartAfterInteraction         | bool                     |                  | NO       | true                 |
+| restartAfterInteractionDuration | Duration                 |                  | NO       | Duration(seconds: 3) |
+| controller                      | MarqueeController        |                  | NO       | null                 |
+| onChangeItemInViewPort          | void Function(index int) | callback         | NO       | null                 |
+| onInteraction                   | void Function()          | callback         | NO       | null                 |
+| onStarted                       | void Function()          | callback         | NO       | null                 |
+| onStoped                        | void Function()          | callback         | NO       | null                 |
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
 
 ```dart
-const like = 'sample';
+final controller = MarqueeController();
+
+SizedBox(
+    height: 30,
+    child: Marquee(
+        pps: 100, /// optional
+        controller: controller, /// optional
+        direction: MarqueeDirection.rtl,  /// optional
+        restartAfterInteractionDuration: const Duration(seconds: 6), /// optional
+        restartAfterInteraction: false, /// optional
+        onChangeItemInViewPort: (index) {
+            print('item index: $index');
+        },
+        onInteraction: () {
+            print('on interaction callback');
+        },
+        onStarted: () {
+            print('on started callback');
+        },
+        onStoped: () {
+            print('on stopped callback');
+        },
+        child: const Text(
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer pretium massa mollis lorem blandit imperdiet. Nulla mattis vitae mauris vel condimentum. Nam posuere, augue vitae lobortis consequat, odio ante condimentum est, at maximus augue purus id metus. Curabitur condimentum aliquet ante at aliquet. Quisque vel massa congue, bibendum leo sodales, malesuada ante. Maecenas sed tortor quis ipsum dictum sollicitudin.',
+        ),
+    ),
+);
 ```
 
-## Additional information
+Basic usage
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```dart
+
+Marquee(
+    child: AnyWidget()
+)
+
+```
