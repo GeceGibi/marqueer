@@ -1,6 +1,7 @@
 library marquee;
 
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 enum MarqueeDirection {
@@ -8,15 +9,43 @@ enum MarqueeDirection {
   ltr,
 }
 
+class MarqueeController {
+  MarqueeController();
+
+  final _marquees = <_MarqueeState>[];
+  void _attach(_MarqueeState marquee) {
+    _marquees.add(marquee);
+  }
+
+  void start() {
+    assert(_marquees.isNotEmpty, "Not found any attached marquee widget");
+    for (var marq in _marquees) {
+      marq.start();
+    }
+  }
+
+  void stop() {
+    assert(_marquees.isNotEmpty, "Not found any attached marquee widget");
+    for (var marq in _marquees) {
+      marq.stop();
+    }
+  }
+}
+
 class Marquee extends StatefulWidget {
   const Marquee({
     required this.child,
     this.pps = 15.0,
-    this.direction = MarqueeDirection.rtl,
-    this.swipeable = true,
+    this.direction = MarqueeDirection.ltr,
+    this.interaction = true,
     this.initialOffset = 0.0,
     this.restartAfterInteractionDuration = const Duration(seconds: 3),
-    this.stopWhenInteraction = false,
+    this.restartAfterInteraction = true,
+    this.onChangeItemInViewPort,
+    this.controller,
+    // this.onInteraction,
+    // this.onStart,
+    // this.onStop,
     super.key,
   });
 
@@ -32,14 +61,22 @@ class Marquee extends StatefulWidget {
   /// Initial offset
   final double initialOffset;
 
-  /// Swipeable
-  final bool swipeable;
+  /// Interactions
+  final bool interaction;
+
+  /// Stop when interaction
+  final bool restartAfterInteraction;
 
   /// Restart delay
   final Duration restartAfterInteractionDuration;
 
-  /// Stop when interaction
-  final bool stopWhenInteraction;
+  final MarqueeController? controller;
+
+  /// callbacks
+  // final void Function()? onStart;
+  // final void Function()? onStop;
+  // final void Function()? onInteraction;
+  final void Function(int index)? onChangeItemInViewPort;
 
   @override
   State<Marquee> createState() => _MarqueeState();
@@ -56,7 +93,9 @@ class _MarqueeState extends State<Marquee> {
   Duration get duration => Duration(seconds: step ~/ widget.pps);
 
   Timer? timerLoop;
-  Timer? timerTouch;
+  Timer? timerInteraction;
+
+  var animating = true;
 
   void animate() {
     controller.animateTo(
@@ -64,9 +103,11 @@ class _MarqueeState extends State<Marquee> {
       duration: duration,
       curve: Curves.linear,
     );
+
+    // widget.onStart?.call();
   }
 
-  void begin() {
+  void start() {
     timerLoop?.cancel();
     timerLoop = Timer.periodic(duration, (_) {
       offset = controller.offset;
@@ -76,15 +117,21 @@ class _MarqueeState extends State<Marquee> {
     animate();
   }
 
+  void stop() {
+    timerLoop?.cancel();
+    timerInteraction?.cancel();
+    controller.jumpTo(controller.offset);
+  }
+
   Future<void> onPointerUpHandler(PointerUpEvent event) async {
-    if (!widget.stopWhenInteraction) {
+    if (widget.restartAfterInteraction) {
       /// Clear prev timer if setted
-      timerTouch?.cancel();
+      timerInteraction?.cancel();
 
       /// Wait for scroll animation end
-      timerTouch = Timer(widget.restartAfterInteractionDuration, () {
+      timerInteraction = Timer(widget.restartAfterInteractionDuration, () {
         offset = controller.offset;
-        begin();
+        start();
       });
     }
   }
@@ -94,35 +141,41 @@ class _MarqueeState extends State<Marquee> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      begin();
+      widget.controller?._attach(this);
+      start();
     });
   }
 
   @override
   void dispose() {
     timerLoop?.cancel();
-    timerTouch?.cancel();
+    timerInteraction?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final physics = widget.swipeable
+    final physics = widget.interaction
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
     final marquee = ListView.builder(
       controller: controller,
       padding: EdgeInsets.zero,
-      reverse: widget.direction == MarqueeDirection.ltr,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      reverse: widget.direction == MarqueeDirection.rtl,
       addAutomaticKeepAlives: false,
       scrollDirection: Axis.horizontal,
       physics: physics,
-      itemBuilder: (context, index) => widget.child,
+      itemBuilder: (context, index) {
+        widget.onChangeItemInViewPort?.call(index);
+        return widget.child;
+      },
     );
 
-    if (widget.swipeable) {
+    if (widget.interaction) {
       return Listener(
+        // onPointerDown: (_) => widget.onStop?.call(),
         onPointerUp: onPointerUpHandler,
         child: marquee,
       );
