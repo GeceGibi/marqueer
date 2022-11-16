@@ -95,7 +95,7 @@ class _MarqueeState extends State<Marquee> {
   Timer? timerLoop;
   Timer? timerInteraction;
 
-  var animating = true;
+  var animating = false;
 
   void animate() {
     controller.animateTo(
@@ -108,6 +108,11 @@ class _MarqueeState extends State<Marquee> {
   }
 
   void start() {
+    if (animating) {
+      return;
+    }
+
+    animating = true;
     timerLoop?.cancel();
     timerLoop = Timer.periodic(duration, (_) {
       offset = controller.offset;
@@ -118,6 +123,11 @@ class _MarqueeState extends State<Marquee> {
   }
 
   void stop() {
+    if (!animating) {
+      return;
+    }
+
+    animating = false;
     timerLoop?.cancel();
     timerInteraction?.cancel();
     controller.jumpTo(controller.offset);

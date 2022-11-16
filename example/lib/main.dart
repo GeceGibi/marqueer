@@ -40,19 +40,6 @@ class _AppHomeState extends State<AppHome> {
   final controller = MarqueeController();
 
   @override
-  void initState() {
-    super.initState();
-
-    Future.delayed(const Duration(seconds: 3), () {
-      controller.stop();
-    });
-
-    Future.delayed(const Duration(seconds: 5), () {
-      controller.start();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
@@ -73,6 +60,7 @@ class _AppHomeState extends State<AppHome> {
           SizedBox(
             height: 30,
             child: Marquee(
+              interaction: false,
               controller: controller,
               direction: MarqueeDirection.rtl,
               child: Text(
