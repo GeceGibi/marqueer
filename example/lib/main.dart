@@ -51,7 +51,18 @@ class _AppHomeState extends State<AppHome> {
             child: Marquee(
               pps: 100,
               controller: controller,
-              direction: MarqueeDirection.rtl,
+              onChangeItemInViewPort: (index) {
+                print(index);
+              },
+              onInteraction: () {
+                print('interaction callback');
+              },
+              onStarted: () {
+                print('marquee started');
+              },
+              onStoped: () {
+                print('marquee stoped');
+              },
               child: Text(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer pretium massa mollis lorem blandit imperdiet. Nulla mattis vitae mauris vel condimentum. Nam posuere, augue vitae lobortis consequat, odio ante condimentum est, at maximus augue purus id metus. Curabitur condimentum aliquet ante at aliquet. Quisque vel massa congue, bibendum leo sodales, malesuada ante. Maecenas sed tortor quis ipsum dictum sollicitudin.',
               ),
@@ -71,7 +82,7 @@ class _AppHomeState extends State<AppHome> {
           SizedBox(
             height: 160,
             child: Marquee(
-              pps: 100,
+              pps: 60,
               controller: controller,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,

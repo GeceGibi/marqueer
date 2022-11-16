@@ -43,9 +43,9 @@ class Marquee extends StatefulWidget {
     this.restartAfterInteraction = true,
     this.onChangeItemInViewPort,
     this.controller,
-    // this.onInteraction,
-    // this.onStart,
-    // this.onStop,
+    this.onInteraction,
+    this.onStarted,
+    this.onStoped,
     super.key,
   });
 
@@ -73,9 +73,9 @@ class Marquee extends StatefulWidget {
   final MarqueeController? controller;
 
   /// callbacks
-  // final void Function()? onStart;
-  // final void Function()? onStop;
-  // final void Function()? onInteraction;
+  final void Function()? onStarted;
+  final void Function()? onStoped;
+  final void Function()? onInteraction;
   final void Function(int index)? onChangeItemInViewPort;
 
   @override
@@ -103,8 +103,6 @@ class _MarqueeState extends State<Marquee> {
       duration: duration,
       curve: Curves.linear,
     );
-
-    // widget.onStart?.call();
   }
 
   void start() {
@@ -120,6 +118,7 @@ class _MarqueeState extends State<Marquee> {
     });
 
     animate();
+    widget.onStarted?.call();
   }
 
   void stop() {
@@ -131,9 +130,15 @@ class _MarqueeState extends State<Marquee> {
     timerLoop?.cancel();
     timerInteraction?.cancel();
     controller.jumpTo(controller.offset);
+    widget.onStoped?.call();
   }
 
-  Future<void> onPointerUpHandler(PointerUpEvent event) async {
+  void onPointerDownHandler(PointerDownEvent event) {
+    animating = false;
+    widget.onInteraction?.call();
+  }
+
+  void onPointerUpHandler(PointerUpEvent event) {
     if (widget.restartAfterInteraction) {
       /// Clear prev timer if setted
       timerInteraction?.cancel();
@@ -185,7 +190,7 @@ class _MarqueeState extends State<Marquee> {
 
     if (widget.interaction) {
       return Listener(
-        // onPointerDown: (_) => widget.onStop?.call(),
+        onPointerDown: onPointerDownHandler,
         onPointerUp: onPointerUpHandler,
         child: marquee,
       );
