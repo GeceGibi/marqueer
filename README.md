@@ -14,21 +14,21 @@ and the Flutter guide for
 Transform to "Marquee" from any widget.
 
 ## Marquee
-| Argument                        | Type                     | Description      | Required | Default              |
-| ------------------------------- |------------------------  | ---------------- | -------- | -------------------- |
-| child                           | Widget                   |                  | YES      | -                    |
-| pps                             | double                   | Pixel Per Second | NO       | 15.0                 |
-| initialOffset                   | double                   | Starter point    | NO       | 0.0                  |
+| Argument                        | Type                     | Description      | Required | Default               |
+| ------------------------------- |------------------------  | ---------------- | -------- | --------------------- |
+| child                           | Widget                   |                  | YES      | -                     |
+| pps                             | double                   | Pixel Per Second | NO       | 15.0                  |
+| initialOffset                   | double                   | Starter point    | NO       | 0.0                   |
 | direction                       | enum                     |                  | NO       | MarqueerDirection.ltr |
-| interaction                     | bool                     |                  | NO       | true                 |
-| autoStart                       | bool                     |                  | NO       | true                 |
-| restartAfterInteraction         | bool                     |                  | NO       | true                 |
-| restartAfterInteractionDuration | Duration                 |                  | NO       | Duration(seconds: 3) |
-| controller                      | MarqueerController       |                  | NO       | null                 |
-| onChangeItemInViewPort          | void Function(index int) | callback         | NO       | null                 |
-| onInteraction                   | void Function()          | callback         | NO       | null                 |
-| onStarted                       | void Function()          | callback         | NO       | null                 |
-| onStoped                        | void Function()          | callback         | NO       | null                 |
+| interaction                     | bool                     |                  | NO       | true                  |
+| autoStart                       | bool                     |                  | NO       | true                  |
+| restartAfterInteraction         | bool                     |                  | NO       | true                  | 
+| restartAfterInteractionDuration | Duration                 |                  | NO       | Duration(seconds: 3)  |
+| controller                      | MarqueerController       |                  | NO       | null                  |
+| onChangeItemInViewPort          | void Function(index int) | callback         | NO       | null                  |
+| onInteraction                   | void Function()          | callback         | NO       | null                  |
+| onStarted                       | void Function()          | callback         | NO       | null                  |
+| onStoped                        | void Function()          | callback         | NO       | null                  |
 
 
 ```dart
