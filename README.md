@@ -20,6 +20,7 @@ Transform to "Marquee" from any widget.
 | pps                             | double                   | Pixel Per Second | NO       | 15.0                  |
 | initialOffset                   | double                   | Starter point    | NO       | 0.0                   |
 | direction                       | enum                     |                  | NO       | MarqueerDirection.ltr |
+| seperator                       | Widget                   |                  | NO       | null                  |  
 | interaction                     | bool                     |                  | NO       | true                  |
 | autoStart                       | bool                     |                  | NO       | true                  |
 | restartAfterInteraction         | bool                     |                  | NO       | true                  | 

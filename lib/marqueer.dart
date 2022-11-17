@@ -13,26 +13,32 @@ class MarqueerController {
   MarqueerController();
 
   final _marquees = <_MarqueerState>[];
-  void _attach(_MarqueerState marquee) {
-    _marquees.add(marquee);
+  void _attach(_MarqueerState marqueer) {
+    _marquees.add(marqueer);
   }
 
+  void _deattach(_MarqueerState marqueer) {
+    _marquees.remove(marqueer);
+  }
+
+  bool get hasClients => _marquees.isNotEmpty;
+
   void start() {
-    assert(_marquees.isNotEmpty, "Not found any attached marquee widget");
+    assert(hasClients, "Not found any attached marqueer widget");
     for (var marq in _marquees) {
       marq.start();
     }
   }
 
   void stop() {
-    assert(_marquees.isNotEmpty, "Not found any attached marquee widget");
+    assert(hasClients, "Not found any attached marqueer widget");
     for (var marq in _marquees) {
       marq.stop();
     }
   }
 
   void interactionEnabled(bool enabled) {
-    assert(_marquees.isNotEmpty, "Not found any attached marquee widget");
+    assert(hasClients, "Not found any attached marqueer widget");
     for (var marq in _marquees) {
       marq.interactionEnabled(enabled);
     }
@@ -199,6 +205,7 @@ class _MarqueerState extends State<Marqueer> {
   void dispose() {
     timerLoop?.cancel();
     timerInteraction?.cancel();
+    widget.controller?._deattach(this);
     super.dispose();
   }
 
@@ -233,6 +240,8 @@ class _MarqueerState extends State<Marqueer> {
 
               return Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: children,
               );
             }
