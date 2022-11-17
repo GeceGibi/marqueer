@@ -4,16 +4,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-enum MarqueeDirection {
+enum MarqueerDirection {
   rtl,
   ltr,
 }
 
-class MarqueeController {
-  MarqueeController();
+class MarqueerController {
+  MarqueerController();
 
-  final _marquees = <_MarqueeState>[];
-  void _attach(_MarqueeState marquee) {
+  final _marquees = <_MarqueerState>[];
+  void _attach(_MarqueerState marquee) {
     _marquees.add(marquee);
   }
 
@@ -39,17 +39,18 @@ class MarqueeController {
   }
 }
 
-class Marquee extends StatefulWidget {
-  const Marquee({
+class Marqueer extends StatefulWidget {
+  const Marqueer({
     required this.child,
     this.pps = 15.0,
     this.autoStart = true,
-    this.direction = MarqueeDirection.ltr,
+    this.direction = MarqueerDirection.ltr,
     this.interaction = true,
     this.initialOffset = 0.0,
     this.restartAfterInteractionDuration = const Duration(seconds: 3),
     this.restartAfterInteraction = true,
     this.onChangeItemInViewPort,
+    this.seperator,
     this.controller,
     this.onInteraction,
     this.onStarted,
@@ -61,7 +62,7 @@ class Marquee extends StatefulWidget {
   final Widget child;
 
   /// Direction
-  final MarqueeDirection direction;
+  final MarqueerDirection direction;
 
   /// Pixel Per Second
   final double pps;
@@ -79,10 +80,13 @@ class Marquee extends StatefulWidget {
   final Duration restartAfterInteractionDuration;
 
   /// Controller
-  final MarqueeController? controller;
+  final MarqueerController? controller;
 
   /// auto start
   final bool autoStart;
+
+  /// Seperator widget
+  final Widget? seperator;
 
   /// callbacks
   final void Function()? onStarted;
@@ -91,10 +95,10 @@ class Marquee extends StatefulWidget {
   final void Function(int index)? onChangeItemInViewPort;
 
   @override
-  State<Marquee> createState() => _MarqueeState();
+  State<Marqueer> createState() => _MarqueerState();
 }
 
-class _MarqueeState extends State<Marquee> {
+class _MarqueerState extends State<Marqueer> {
   late final controller = ScrollController(
     initialScrollOffset: widget.initialOffset,
   );
@@ -204,6 +208,8 @@ class _MarqueeState extends State<Marquee> {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
+    final isReverse = widget.direction == MarqueerDirection.rtl;
+
     return IgnorePointer(
       ignoring: !interaction,
       child: Listener(
@@ -213,12 +219,24 @@ class _MarqueeState extends State<Marquee> {
           controller: controller,
           padding: EdgeInsets.zero,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          reverse: widget.direction == MarqueeDirection.rtl,
+          reverse: isReverse,
           addAutomaticKeepAlives: false,
           scrollDirection: Axis.horizontal,
           physics: physics,
           itemBuilder: (context, index) {
             widget.onChangeItemInViewPort?.call(index);
+
+            if (widget.seperator != null) {
+              final children = [widget.child];
+
+              children.insert(isReverse ? 0 : 1, widget.seperator!);
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: children,
+              );
+            }
+
             return widget.child;
           },
         ),

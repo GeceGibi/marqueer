@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_marquee/flutter_marquee.dart';
+import 'package:marqueer/marqueer.dart';
 
 void main() {
   runApp(const ExampleApp());
@@ -39,7 +39,7 @@ class _AppHomeState extends State<AppHome> {
           SizedBox(height: 40),
           SizedBox(
             height: 100,
-            child: Marquee(
+            child: Marqueer(
               pps: 30,
               child: Row(
                 children: List<Widget>.generate(10, (index) {
@@ -64,7 +64,7 @@ class _PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<_PostCard> {
-  final controller = MarqueeController();
+  final controller = MarqueerController();
 
   @override
   void initState() {
@@ -102,7 +102,7 @@ class _PostCardState extends State<_PostCard> {
               filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
               child: ColoredBox(
                 color: const Color(0xaa000000),
-                child: Marquee(
+                child: Marqueer(
                   controller: controller,
                   child: const Padding(
                     padding: EdgeInsets.all(12),
