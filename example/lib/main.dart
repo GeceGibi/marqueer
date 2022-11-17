@@ -36,6 +36,21 @@ class _AppHomeState extends State<AppHome> {
         padding: const EdgeInsets.symmetric(vertical: 20),
         children: [
           _PostCard(),
+          SizedBox(height: 40),
+          SizedBox(
+            height: 100,
+            child: Marquee(
+              pps: 30,
+              child: Row(
+                children: List<Widget>.generate(10, (index) {
+                  return Image.network(
+                    'https://picsum.photos/id/40$index/60/100',
+                    width: 60,
+                  );
+                }),
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -65,12 +80,14 @@ class _PostCardState extends State<_PostCard> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        LayoutBuilder(builder: (context, conts) {
+        LayoutBuilder(builder: (context, consts) {
+          final size = consts.maxWidth;
+
           return SizedBox(
-            height: conts.maxWidth,
-            width: conts.maxWidth,
+            height: size,
+            width: size,
             child: Image.network(
-              'https://images.pexels.com/photos/9968493/pexels-photo-9968493.jpeg?auto=compress&cs=tinysrgb&w=${conts.maxWidth}&h=${conts.maxWidth}&dpr=2',
+              'https://images.pexels.com/photos/9968493/pexels-photo-9968493.jpeg?auto=compress&cs=tinysrgb&w=$size&h=$size&dpr=2',
               fit: BoxFit.cover,
             ),
           );
