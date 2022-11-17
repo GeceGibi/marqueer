@@ -19,12 +19,12 @@ Transform to "Marquee" from any widget.
 | child                           | Widget                   |                  | YES      | -                    |
 | pps                             | double                   | Pixel Per Second | NO       | 15.0                 |
 | initialOffset                   | double                   | Starter point    | NO       | 0.0                  |
-| direction                       | enum (MarqueeDirection)  |                  | NO       | MarqueeDirection.ltr |
+| direction                       | enum                     |                  | NO       | MarqueerDirection.ltr |
 | interaction                     | bool                     |                  | NO       | true                 |
 | autoStart                       | bool                     |                  | NO       | true                 |
 | restartAfterInteraction         | bool                     |                  | NO       | true                 |
 | restartAfterInteractionDuration | Duration                 |                  | NO       | Duration(seconds: 3) |
-| controller                      | MarqueeController        |                  | NO       | null                 |
+| controller                      | MarqueerController       |                  | NO       | null                 |
 | onChangeItemInViewPort          | void Function(index int) | callback         | NO       | null                 |
 | onInteraction                   | void Function()          | callback         | NO       | null                 |
 | onStarted                       | void Function()          | callback         | NO       | null                 |
@@ -32,14 +32,18 @@ Transform to "Marquee" from any widget.
 
 
 ```dart
-final controller = MarqueeController();
+final controller = MarqueerController();
+
+/// controller.start()
+/// controller.stop()
+/// controller.interactionEnabled(false)
 
 SizedBox(
     height: 30,
-    child: Marquee(
+    child: Marqueer(
         pps: 100, /// optional
         controller: controller, /// optional
-        direction: MarqueeDirection.rtl,  /// optional
+        direction: MarqueerDirection.rtl,  /// optional
         restartAfterInteractionDuration: const Duration(seconds: 6), /// optional
         restartAfterInteraction: false, /// optional
         onChangeItemInViewPort: (index) {
@@ -64,9 +68,10 @@ SizedBox(
 Basic usage
 
 ```dart
-
-Marquee(
-    child: AnyWidget()
+SizedBox(
+    height: 50,
+    child:Marqueer(
+        child: AnyWidget()
+    )
 )
-
 ```
