@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_marquee/flutter_marquee.dart';
+import 'package:marquee/marquee.dart';
 
 void main() {
   runApp(const ExampleApp());
