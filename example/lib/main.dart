@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:marquee/marquee.dart';
+import 'package:flutter_marquee/flutter_marquee.dart';
 
 void main() {
   runApp(const ExampleApp());
@@ -55,7 +55,10 @@ class _PostCardState extends State<_PostCard> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 2), controller.start);
+    Future.delayed(const Duration(seconds: 5), () {
+      controller.interactionEnabled(false);
+      Future.delayed(const Duration(seconds: 1), controller.start);
+    });
   }
 
   @override
@@ -73,6 +76,7 @@ class _PostCardState extends State<_PostCard> {
           );
         }),
         Positioned(
+          height: 42,
           bottom: 0,
           left: 0,
           right: 0,
@@ -81,21 +85,14 @@ class _PostCardState extends State<_PostCard> {
               filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
               child: ColoredBox(
                 color: const Color(0xaa000000),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: SizedBox(
-                    height: 16,
-                    child: Marquee(
-                      controller: controller,
-                      autoStart: false,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          "Curabitur nec ex auctor risus scelerisque rhoncus ut porttitor sapien. Pellentesque vestibulum leo a nisi sollicitudin vehicula. Ut fringilla elementum iaculis. Sed risus justo, facilisis at metus sed, interdum euismod lectus. Vivamus tincidunt lorem vel mauris hendrerit, a efficitur felis porttitor. Nulla facilisi.",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
+                child: Marquee(
+                  controller: controller,
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(
+                      "Curabitur nec ex auctor risus scelerisque rhoncus ut porttitor sapien. Pellentesque vestibulum leo a nisi sollicitudin vehicula. Ut fringilla elementum iaculis. Sed risus justo, facilisis at metus sed, interdum euismod lectus. Vivamus tincidunt lorem vel mauris hendrerit, a efficitur felis porttitor. Nulla facilisi.",
+                      style: TextStyle(
+                        color: Colors.white,
                       ),
                     ),
                   ),

@@ -1,7 +1,6 @@
 library marquee;
 
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -29,6 +28,13 @@ class MarqueeController {
     assert(_marquees.isNotEmpty, "Not found any attached marquee widget");
     for (var marq in _marquees) {
       marq.stop();
+    }
+  }
+
+  void interactionEnabled(bool enabled) {
+    assert(_marquees.isNotEmpty, "Not found any attached marquee widget");
+    for (var marq in _marquees) {
+      marq.interactionEnabled(enabled);
     }
   }
 }
@@ -101,6 +107,7 @@ class _MarqueeState extends State<Marquee> {
   Duration get duration => Duration(seconds: step ~/ widget.pps);
 
   var animating = false;
+  late var interaction = widget.interaction;
 
   void animate() {
     controller.animateTo(
@@ -116,6 +123,7 @@ class _MarqueeState extends State<Marquee> {
     }
 
     animating = true;
+
     timerLoop?.cancel();
     timerLoop = Timer.periodic(duration, (_) {
       offset = controller.offset;
@@ -132,10 +140,25 @@ class _MarqueeState extends State<Marquee> {
     }
 
     animating = false;
+
     timerLoop?.cancel();
     timerInteraction?.cancel();
+
     controller.jumpTo(controller.offset);
+    offset = controller.offset;
+
     widget.onStoped?.call();
+  }
+
+  void interactionEnabled(bool enabled) {
+    if (interaction != enabled) {
+      offset = controller.offset;
+      timerInteraction?.cancel();
+
+      setState(() {
+        interaction = enabled;
+      });
+    }
   }
 
   void onPointerUpHandler(PointerUpEvent event) {
@@ -177,32 +200,29 @@ class _MarqueeState extends State<Marquee> {
 
   @override
   Widget build(BuildContext context) {
-    final physics = widget.interaction
+    final physics = interaction
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    final marquee = ListView.builder(
-      controller: controller,
-      padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      reverse: widget.direction == MarqueeDirection.rtl,
-      addAutomaticKeepAlives: false,
-      scrollDirection: Axis.horizontal,
-      physics: physics,
-      itemBuilder: (context, index) {
-        widget.onChangeItemInViewPort?.call(index);
-        return widget.child;
-      },
-    );
-
-    if (widget.interaction) {
-      return Listener(
+    return IgnorePointer(
+      ignoring: !interaction,
+      child: Listener(
         onPointerDown: onPointerDownHandler,
         onPointerUp: onPointerUpHandler,
-        child: marquee,
-      );
-    }
-
-    return marquee;
+        child: ListView.builder(
+          controller: controller,
+          padding: EdgeInsets.zero,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          reverse: widget.direction == MarqueeDirection.rtl,
+          addAutomaticKeepAlives: false,
+          scrollDirection: Axis.horizontal,
+          physics: physics,
+          itemBuilder: (context, index) {
+            widget.onChangeItemInViewPort?.call(index);
+            return widget.child;
+          },
+        ),
+      ),
+    );
   }
 }
