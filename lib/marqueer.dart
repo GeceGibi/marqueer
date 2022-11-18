@@ -145,9 +145,9 @@ class _MarqueerState extends State<Marqueer> {
   }
 
   /// Duration calculating after every interaction
-  /// so Timer.periodic not good solition
+  /// so Timer.periodic is not a good solution
   void createLoop() {
-    const delay = Duration(milliseconds: 50);
+    final delay = Duration(milliseconds: widget.infinity ? 0 : 50);
 
     timerLoop?.cancel();
     timerLoop = Timer(duration + delay, () {
@@ -254,21 +254,21 @@ class _MarqueerState extends State<Marqueer> {
     super.initState();
     widget.controller?._attach(this);
 
-    if (widget.autoStart) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.autoStart) {
         start();
-      });
-    }
+      }
 
-    if (!widget.infinity) {
-      controller.addListener(() {
-        final direction = controller.position.userScrollDirection;
+      if (!widget.infinity) {
+        controller.addListener(() {
+          final direction = controller.position.userScrollDirection;
 
-        if (interactionDirection != direction) {
-          interactionDirection = direction;
-        }
-      });
-    }
+          if (interactionDirection != direction) {
+            interactionDirection = direction;
+          }
+        });
+      }
+    });
   }
 
   @override

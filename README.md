@@ -18,9 +18,9 @@ Transform to "Marquee" from any widget.
 | ------------------------------- |------------------------  | ---------------- | -------- | --------------------- |
 | child                           | Widget                   |                  | YES      | -                     |
 | pps                             | double                   | Pixel Per Second | NO       | 15.0                  |
-| initialOffset                   | double                   | Starter point    | NO       | 0.0                   |
-| direction                       | enum                     |                  | NO       | MarqueerDirection.ltr |
-| seperator                       | Widget                   |                  | NO       | null                  |  
+| direction                       | enum                     |                  | NO       | MarqueerDirection.rtl |
+| seperator                       | Widget                   |                  | NO       | null                  |
+| infinity                        | bool                     |                  | NO       | true                  |    
 | interaction                     | bool                     |                  | NO       | true                  |
 | autoStart                       | bool                     |                  | NO       | true                  |
 | restartAfterInteraction         | bool                     |                  | NO       | true                  | 
