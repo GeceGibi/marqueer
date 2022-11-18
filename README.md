@@ -14,7 +14,7 @@ and the Flutter guide for
 Transform to "Marquee" from any widget.
 
 
-<img src="preview.gif" alt="preview">
+<img src="https://raw.githubusercontent.com/GeceGibi/marqueer/main/preview.gif" alt="preview">
 
 
 ## Marquee
