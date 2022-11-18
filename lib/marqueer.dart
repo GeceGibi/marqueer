@@ -2,6 +2,7 @@ library marquee;
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 enum MarqueerDirection {
@@ -49,10 +50,10 @@ class Marqueer extends StatefulWidget {
   const Marqueer({
     required this.child,
     this.pps = 15.0,
+    this.infinity = true,
     this.autoStart = true,
-    this.direction = MarqueerDirection.ltr,
+    this.direction = MarqueerDirection.rtl,
     this.interaction = true,
-    this.initialOffset = 0.0,
     this.restartAfterInteractionDuration = const Duration(seconds: 3),
     this.restartAfterInteraction = true,
     this.onChangeItemInViewPort,
@@ -73,9 +74,6 @@ class Marqueer extends StatefulWidget {
   /// Pixel Per Second
   final double pps;
 
-  /// Initial offset
-  final double initialOffset;
-
   /// Interactions
   final bool interaction;
 
@@ -94,6 +92,9 @@ class Marqueer extends StatefulWidget {
   /// Seperator widget
   final Widget? seperator;
 
+  ///
+  final bool infinity;
+
   /// callbacks
   final void Function()? onStarted;
   final void Function()? onStoped;
@@ -105,19 +106,22 @@ class Marqueer extends StatefulWidget {
 }
 
 class _MarqueerState extends State<Marqueer> {
-  late final controller = ScrollController(
-    initialScrollOffset: widget.initialOffset,
-  );
+  late final controller = ScrollController();
 
-  late var offset = controller.initialScrollOffset;
-  final step = 10000.0;
+  var step = 0.0;
+  var offset = 0.0;
+  var animating = false;
+  var interactionDirection = ScrollDirection.idle;
+
+  late var interaction = widget.interaction;
 
   Timer? timerLoop;
   Timer? timerInteraction;
-  Duration get duration => Duration(seconds: step ~/ widget.pps);
 
-  var animating = false;
-  late var interaction = widget.interaction;
+  /// default delay added for wait scroll anim. end;
+  Duration get duration => Duration(
+        milliseconds: ((step / widget.pps) * 1000).round(),
+      );
 
   void animate() {
     controller.animateTo(
@@ -132,16 +136,26 @@ class _MarqueerState extends State<Marqueer> {
       return;
     }
 
-    animating = true;
+    if (calculateDistance()) {
+      animating = true;
+      animate();
+      createLoop();
+      widget.onStarted?.call();
+    }
+  }
+
+  /// Duration calculating after every interaction
+  /// so Timer.periodic not good solition
+  void createLoop() {
+    const delay = Duration(milliseconds: 50);
 
     timerLoop?.cancel();
-    timerLoop = Timer.periodic(duration, (_) {
-      offset = controller.offset;
-      animate();
+    timerLoop = Timer(duration + delay, () {
+      if (calculateDistance()) {
+        createLoop();
+        animate();
+      }
     });
-
-    animate();
-    widget.onStarted?.call();
   }
 
   void stop() {
@@ -160,6 +174,50 @@ class _MarqueerState extends State<Marqueer> {
     widget.onStoped?.call();
   }
 
+  bool calculateDistance() {
+    final currentPos = controller.offset;
+    final maxPos = controller.position.maxScrollExtent;
+
+    if (widget.infinity) {
+      offset = currentPos;
+      step = 10000.0;
+      return true;
+    }
+
+    // Has scrollable content
+    if (maxPos > 0) {
+      switch (interactionDirection) {
+        case ScrollDirection.idle:
+          step = maxPos;
+          offset = currentPos <= 1.0 ? 0 : -maxPos;
+          break;
+
+        case ScrollDirection.forward:
+          final isStart = currentPos == 0;
+          step = isStart ? maxPos : maxPos - (maxPos - currentPos);
+          offset = isStart ? 0 : -step;
+          break;
+
+        case ScrollDirection.reverse:
+          final isEnd = maxPos - currentPos == 0;
+          step = isEnd ? maxPos : maxPos - currentPos;
+          offset = isEnd ? -maxPos : maxPos - step;
+          break;
+      }
+
+      // print(duration);
+      // print('step: $step');
+      // print('offset: $offset');
+      // print('pos: ${step + offset}');
+      // print('interactionDirection: ${interactionDirection.name}');
+      // print('\n\n\n');
+
+      return true;
+    }
+
+    return false;
+  }
+
   void interactionEnabled(bool enabled) {
     if (interaction != enabled) {
       offset = controller.offset;
@@ -175,8 +233,9 @@ class _MarqueerState extends State<Marqueer> {
     if (widget.restartAfterInteraction) {
       /// Wait for scroll animation end
       timerInteraction = Timer(widget.restartAfterInteractionDuration, () {
-        offset = controller.offset;
-        start();
+        if (calculateDistance()) {
+          start();
+        }
       });
     }
   }
@@ -187,6 +246,7 @@ class _MarqueerState extends State<Marqueer> {
 
     /// Clear prev timer if setted
     timerInteraction?.cancel();
+    timerLoop?.cancel();
   }
 
   @override
@@ -199,10 +259,21 @@ class _MarqueerState extends State<Marqueer> {
         start();
       });
     }
+
+    if (!widget.infinity) {
+      controller.addListener(() {
+        final direction = controller.position.userScrollDirection;
+
+        if (interactionDirection != direction) {
+          interactionDirection = direction;
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    controller.dispose();
     timerLoop?.cancel();
     timerInteraction?.cancel();
     widget.controller?._deattach(this);
@@ -215,7 +286,7 @@ class _MarqueerState extends State<Marqueer> {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    final isReverse = widget.direction == MarqueerDirection.rtl;
+    final isReverse = widget.direction == MarqueerDirection.ltr;
 
     return IgnorePointer(
       ignoring: !interaction,
@@ -226,14 +297,15 @@ class _MarqueerState extends State<Marqueer> {
           controller: controller,
           padding: EdgeInsets.zero,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          reverse: isReverse,
           addAutomaticKeepAlives: false,
           scrollDirection: Axis.horizontal,
           physics: physics,
+          reverse: isReverse,
+          itemCount: widget.infinity ? null : 1,
           itemBuilder: (context, index) {
             widget.onChangeItemInViewPort?.call(index);
 
-            if (widget.seperator != null) {
+            if (widget.seperator != null && widget.infinity) {
               final children = [widget.child];
 
               children.insert(isReverse ? 0 : 1, widget.seperator!);

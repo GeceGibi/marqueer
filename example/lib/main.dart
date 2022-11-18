@@ -35,17 +35,33 @@ class _AppHomeState extends State<AppHome> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 20),
         children: [
-          _PostCard(),
-          SizedBox(height: 40),
+          const _PostCard(),
+          const SizedBox(height: 40),
           SizedBox(
-            height: 100,
+            height: 150,
+            child: Marqueer(
+              pps: 60,
+              infinity: false,
+              child: Row(
+                children: List<Widget>.generate(5, (index) {
+                  return Image.network(
+                    'https://api.lorem.space/image/game?w=300&h=300&t=$index',
+                    width: 150,
+                  );
+                }),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 150,
             child: Marqueer(
               pps: 30,
+              direction: MarqueerDirection.ltr,
               child: Row(
-                children: List<Widget>.generate(10, (index) {
+                children: List<Widget>.generate(20, (index) {
                   return Image.network(
-                    'https://picsum.photos/id/40$index/60/100',
-                    width: 60,
+                    'https://api.lorem.space/image/fashion?w=300&h=300&t=$index',
+                    width: 150,
                   );
                 }),
               ),
