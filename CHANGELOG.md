@@ -9,3 +9,6 @@ Update README.md
 Update example project
 Fix direction bug
 Add infinite option
+
+## 1.0.3
+Add Preview

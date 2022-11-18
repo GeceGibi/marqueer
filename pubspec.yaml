@@ -1,6 +1,6 @@
 name: marqueer
 description: Transform to "Marquee" from any widget.
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/GeceGibi/marqueer
 
 environment:
