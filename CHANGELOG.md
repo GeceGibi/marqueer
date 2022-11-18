@@ -10,5 +10,5 @@ Update example project
 Fix direction bug
 Add infinite option
 
-## 1.0.4
+## 1.0.5
 Add Preview
