@@ -199,7 +199,7 @@ class _MarqueerState extends State<Marqueer> {
           break;
 
         case ScrollDirection.reverse:
-          final isEnd = maxPos - currentPos == 0;
+          final isEnd = maxPos == currentPos;
           step = isEnd ? maxPos : maxPos - currentPos;
           offset = isEnd ? -maxPos : maxPos - step;
           break;
