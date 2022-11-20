@@ -57,7 +57,7 @@ class Marqueer extends StatefulWidget {
     this.restartAfterInteractionDuration = const Duration(seconds: 3),
     this.restartAfterInteraction = true,
     this.onChangeItemInViewPort,
-    this.seperator,
+    this.separator,
     this.controller,
     this.onInteraction,
     this.onStarted,
@@ -90,7 +90,7 @@ class Marqueer extends StatefulWidget {
   final bool autoStart;
 
   /// Seperator widget
-  final Widget? seperator;
+  final Widget? separator;
 
   ///
   final bool infinity;
@@ -106,7 +106,7 @@ class Marqueer extends StatefulWidget {
 }
 
 class _MarqueerState extends State<Marqueer> {
-  late final controller = ScrollController();
+  final controller = ScrollController();
 
   var step = 0.0;
   var offset = 0.0;
@@ -305,10 +305,10 @@ class _MarqueerState extends State<Marqueer> {
           itemBuilder: (context, index) {
             widget.onChangeItemInViewPort?.call(index);
 
-            if (widget.seperator != null && widget.infinity) {
+            if (widget.separator != null && widget.infinity) {
               final children = [widget.child];
 
-              children.insert(isReverse ? 0 : 1, widget.seperator!);
+              children.insert(isReverse ? 0 : 1, widget.separator!);
 
               return Row(
                 mainAxisSize: MainAxisSize.min,

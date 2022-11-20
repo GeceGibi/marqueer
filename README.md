@@ -23,7 +23,7 @@ Transform to "Marquee" from any widget.
 | child                           | Widget                   |                  | YES      | -                     |
 | pps                             | double                   | Pixel Per Second | NO       | 15.0                  |
 | direction                       | enum                     |                  | NO       | MarqueerDirection.rtl |
-| seperator                       | Widget                   |                  | NO       | null                  |
+| separator                       | Widget                   |                  | NO       | null                  |
 | infinity                        | bool                     |                  | NO       | true                  |    
 | interaction                     | bool                     |                  | NO       | true                  |
 | autoStart                       | bool                     |                  | NO       | true                  |

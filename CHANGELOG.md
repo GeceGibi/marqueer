@@ -12,3 +12,6 @@ Add infinite option
 
 ## 1.0.5
 Add Preview
+
+## 1.0.6
+Fix typo
