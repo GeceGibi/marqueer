@@ -1,9 +1,8 @@
-## 1.0.7
-Fixed wrong distance calculation with no-infinity widget. When `ScrollDirection.idle`.</br>
-Added `isAnimating` getter to `MarqueerController`.</br>
-`MarqueerController` splitted to own file.</br>
+## 1.1.0
+Fixed wrong distance calculation with no-infinity widget. When `ScrollDirection.idle`.  
+Added `isAnimating` getter to `MarqueerController`.  
+`MarqueerController` splitted to own file.  
 Updated `/example`
-
 
 ## 1.0.6
 Fix typo
@@ -12,13 +11,13 @@ Fix typo
 Add Preview `gif`
 
 ## 1.0.2
-Updated example project<br/>
-Fixed direction bug<br/>
-Added `infinite` option<br/>
+Updated example project  
+Fixed direction bug  
+Added `infinite` option  
 
 ## 1.0.1
-Add `hasClients` getter to MarqueerController<br/>
-Update README.md<br/>
+Add `hasClients` getter to MarqueerController  
+Update README.md  
 
 ## 1.0.0
 initial release.
