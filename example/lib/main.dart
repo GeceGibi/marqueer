@@ -86,9 +86,8 @@ class _PostCardState extends State<_PostCard> {
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 5), () {
-      controller.interactionEnabled(false);
-      Future.delayed(const Duration(seconds: 1), controller.start);
+    Future.delayed(const Duration(seconds: 3), () {
+      controller.start();
     });
   }
 
@@ -97,28 +96,30 @@ class _PostCardState extends State<_PostCard> {
     return Stack(
       children: [
         LayoutBuilder(builder: (context, consts) {
-          final size = consts.maxWidth;
+          final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+          final size = (consts.maxWidth * pixelRatio).toInt();
 
           return SizedBox(
-            height: size,
-            width: size,
+            height: consts.maxWidth,
+            width: consts.maxWidth,
             child: Image.network(
-              'https://images.pexels.com/photos/9968493/pexels-photo-9968493.jpeg?auto=compress&cs=tinysrgb&w=$size&h=$size&dpr=2',
+              'https://api.lorem.space/image/movie?w=$size&h=$size&t',
               fit: BoxFit.cover,
             ),
           );
         }),
         Positioned(
           height: 42,
-          bottom: 0,
+          bottom: 8,
           left: 0,
           right: 0,
           child: ClipRRect(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
               child: ColoredBox(
-                color: const Color(0xaa000000),
+                color: const Color(0x66000000),
                 child: Marqueer(
+                  autoStart: false,
                   controller: controller,
                   child: const Padding(
                     padding: EdgeInsets.all(12),

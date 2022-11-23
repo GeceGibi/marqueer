@@ -1,49 +1,16 @@
-library marquee;
+library marqueer;
 
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+part 'controller.dart';
+
 enum MarqueerDirection {
   rtl,
   ltr,
-}
-
-class MarqueerController {
-  MarqueerController();
-
-  final _marquees = <_MarqueerState>[];
-  void _attach(_MarqueerState marqueer) {
-    _marquees.add(marqueer);
-  }
-
-  void _deattach(_MarqueerState marqueer) {
-    _marquees.remove(marqueer);
-  }
-
-  bool get hasClients => _marquees.isNotEmpty;
-
-  void start() {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var marq in _marquees) {
-      marq.start();
-    }
-  }
-
-  void stop() {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var marq in _marquees) {
-      marq.stop();
-    }
-  }
-
-  void interactionEnabled(bool enabled) {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var marq in _marquees) {
-      marq.interactionEnabled(enabled);
-    }
-  }
 }
 
 class Marqueer extends StatefulWidget {
@@ -184,12 +151,18 @@ class _MarqueerState extends State<Marqueer> {
       return true;
     }
 
+    final random = Random();
+
     // Has scrollable content
     if (maxPos > 0) {
       switch (interactionDirection) {
         case ScrollDirection.idle:
-          step = maxPos;
-          offset = currentPos <= 1.0 ? 0 : -maxPos;
+
+          /// just pick random direction and move on
+          interactionDirection = random.nextBool()
+              ? ScrollDirection.forward
+              : ScrollDirection.reverse;
+          calculateDistance();
           break;
 
         case ScrollDirection.forward:
@@ -204,13 +177,6 @@ class _MarqueerState extends State<Marqueer> {
           offset = isEnd ? -maxPos : maxPos - step;
           break;
       }
-
-      // print(duration);
-      // print('step: $step');
-      // print('offset: $offset');
-      // print('pos: ${step + offset}');
-      // print('interactionDirection: ${interactionDirection.name}');
-      // print('\n\n\n');
 
       return true;
     }
