@@ -57,6 +57,7 @@ class _AppHomeState extends State<AppHome> {
             child: Marqueer(
               pps: 30,
               direction: MarqueerDirection.ltr,
+              autoStartAfter: const Duration(seconds: 2),
               child: Row(
                 children: List<Widget>.generate(20, (index) {
                   return Image.network(

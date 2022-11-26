@@ -14,7 +14,7 @@ enum MarqueerDirection {
 }
 
 class Marqueer extends StatefulWidget {
-  const Marqueer({
+  Marqueer({
     required this.child,
     this.pps = 15.0,
     this.infinity = true,
@@ -24,13 +24,21 @@ class Marqueer extends StatefulWidget {
     this.restartAfterInteractionDuration = const Duration(seconds: 3),
     this.restartAfterInteraction = true,
     this.onChangeItemInViewPort,
-    this.separator,
-    this.controller,
+    this.autoStartAfter = Duration.zero,
     this.onInteraction,
+    this.controller,
     this.onStarted,
     this.onStoped,
+    this.separator,
     super.key,
-  });
+  }) : assert((() {
+          if (autoStartAfter > Duration.zero) {
+            return autoStart;
+          }
+
+          return true;
+        })(),
+            "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`");
 
   /// Child
   final Widget child;
@@ -58,6 +66,9 @@ class Marqueer extends StatefulWidget {
 
   /// Seperator widget
   final Widget? separator;
+
+  /// Auto Start after duration
+  final Duration autoStartAfter;
 
   ///
   final bool infinity;
@@ -99,7 +110,7 @@ class _MarqueerState extends State<Marqueer> {
   }
 
   void start() {
-    if (animating) {
+    if (animating || !mounted) {
       return;
     }
 
@@ -126,7 +137,7 @@ class _MarqueerState extends State<Marqueer> {
   }
 
   void stop() {
-    if (!animating) {
+    if (!animating || !mounted) {
       return;
     }
 
@@ -222,7 +233,7 @@ class _MarqueerState extends State<Marqueer> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.autoStart) {
-        start();
+        Future.delayed(widget.autoStartAfter, start);
       }
 
       if (!widget.infinity) {

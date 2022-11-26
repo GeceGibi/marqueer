@@ -1,3 +1,6 @@
+## 1.1.1
+Added `autoStartAfter` property to `Marquuer` widget for auto start after specific duration
+
 ## 1.1.0
 Fixed wrong distance calculation with no-infinity widget. When `ScrollDirection.idle`.  
 Added `isAnimating` getter to `MarqueerController`.  

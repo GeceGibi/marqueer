@@ -27,6 +27,7 @@ Transform to "Marquee" from any widget.
 | infinity                        | bool                     |                  | NO       | true                  |    
 | interaction                     | bool                     |                  | NO       | true                  |
 | autoStart                       | bool                     |                  | NO       | true                  |
+| autoStartAfter                  | Duration                 |                  | NO       | Duration.zero         |
 | restartAfterInteraction         | bool                     |                  | NO       | true                  | 
 | restartAfterInteractionDuration | Duration                 |                  | NO       | Duration(seconds: 3)  |
 | controller                      | MarqueerController       |                  | NO       | null                  |
