@@ -1,3 +1,6 @@
+## 1.2.0
+Imporoved desktop and web support.
+
 ## 1.1.1
 Added `autoStartAfter` property to `Marquuer` widget for auto start after specific duration
 

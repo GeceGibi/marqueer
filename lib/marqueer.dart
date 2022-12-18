@@ -1,7 +1,9 @@
 library marqueer;
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -248,6 +250,8 @@ class _MarqueerState extends State<Marqueer> {
     });
   }
 
+  bool get isWebOrDesktop => kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
+
   @override
   void dispose() {
     controller.dispose();
@@ -265,39 +269,49 @@ class _MarqueerState extends State<Marqueer> {
 
     final isReverse = widget.direction == MarqueerDirection.ltr;
 
+    Widget body = ListView.builder(
+      controller: controller,
+      padding: EdgeInsets.zero,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      addAutomaticKeepAlives: false,
+      scrollDirection: Axis.horizontal,
+      physics: physics,
+      reverse: isReverse,
+      itemCount: widget.infinity ? null : 1,
+      itemBuilder: (context, index) {
+        widget.onChangeItemInViewPort?.call(index);
+
+        if (widget.separator != null && widget.infinity) {
+          final children = [widget.child];
+
+          children.insert(isReverse ? 0 : 1, widget.separator!);
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: children,
+          );
+        }
+
+        return widget.child;
+      },
+    );
+
+    if (isWebOrDesktop) {
+      body = MouseRegion(
+        onEnter: (_) => stop(),
+        onExit: (_) => start(),
+        child: body,
+      );
+    }
+
     return IgnorePointer(
       ignoring: !interaction,
       child: Listener(
         onPointerDown: onPointerDownHandler,
         onPointerUp: onPointerUpHandler,
-        child: ListView.builder(
-          controller: controller,
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          addAutomaticKeepAlives: false,
-          scrollDirection: Axis.horizontal,
-          physics: physics,
-          reverse: isReverse,
-          itemCount: widget.infinity ? null : 1,
-          itemBuilder: (context, index) {
-            widget.onChangeItemInViewPort?.call(index);
-
-            if (widget.separator != null && widget.infinity) {
-              final children = [widget.child];
-
-              children.insert(isReverse ? 0 : 1, widget.separator!);
-
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: children,
-              );
-            }
-
-            return widget.child;
-          },
-        ),
+        child: body,
       ),
     );
   }
