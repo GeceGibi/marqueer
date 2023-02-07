@@ -33,7 +33,8 @@ class Marqueer extends StatefulWidget {
     this.onStopped,
     this.separator,
     super.key,
-  })  : assert((() {
+  })  : assert(child != null, 'Child can not be null'),
+        assert((() {
           if (autoStartAfter > Duration.zero) {
             return autoStart;
           }
@@ -62,7 +63,8 @@ class Marqueer extends StatefulWidget {
     this.onStopped,
     this.separator,
     super.key,
-  })  : assert((() {
+  })  : assert(itemBuilder != null, 'itemBuilder can not be null'),
+        assert((() {
           if (autoStartAfter > Duration.zero) {
             return autoStart;
           }
@@ -78,10 +80,10 @@ class Marqueer extends StatefulWidget {
           return infinity;
         })(),
             "When `itemCount` was defined `infinity` must be `false`or when `itemCount` was `null`, `infinity` must be `true`"),
-        child = const SizedBox.shrink();
+        child = null;
 
   /// Child
-  final Widget child;
+  final Widget? child;
 
   /// Direction
   final MarqueerDirection direction;
@@ -304,7 +306,7 @@ class _MarqueerState extends State<Marqueer> {
     }
 
     if (widget.separator != null && widget.infinity) {
-      final children = [widget.child];
+      final children = [widget.child!];
 
       children.insert(isReverse ? 0 : 1, widget.separator!);
 
