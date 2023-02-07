@@ -18,23 +18,27 @@ Transform to "Marquee" from any widget.
 
 
 ## Marquee
-| Argument                        | Type                     | Description      | Required | Default               |
-| ------------------------------- |------------------------  | ---------------- | -------- | --------------------- |
-| child                           | Widget                   |                  | YES      | -                     |
-| pps                             | double                   | Pixel Per Second | NO       | 15.0                  |
-| direction                       | enum                     |                  | NO       | MarqueerDirection.rtl |
-| separator                       | Widget                   |                  | NO       | null                  |
-| infinity                        | bool                     |                  | NO       | true                  |    
-| interaction                     | bool                     |                  | NO       | true                  |
-| autoStart                       | bool                     |                  | NO       | true                  |
-| autoStartAfter                  | Duration                 |                  | NO       | Duration.zero         |
-| restartAfterInteraction         | bool                     |                  | NO       | true                  | 
-| restartAfterInteractionDuration | Duration                 |                  | NO       | Duration(seconds: 3)  |
-| controller                      | MarqueerController       |                  | NO       | null                  |
-| onChangeItemInViewPort          | void Function(index int) | callback         | NO       | null                  |
-| onInteraction                   | void Function()          | callback         | NO       | null                  |
-| onStarted                       | void Function()          | callback         | NO       | null                  |
-| onStopped                       | void Function()          | callback         | NO       | null                  |
+| Argument                        | Type                                              | Description      | Required | Default               |
+| ------------------------------- |-------------------------------------------------  | ---------------- | -------- | --------------------- |
+| child                           | Widget                                            |                  | YES      | -                     |
+| pps                             | double                                            | Pixel Per Second | NO       | 15.0                  |
+| direction                       | enum                                              |                  | NO       | MarqueerDirection.rtl |
+| separator                       | Widget                                            |                  | NO       | null                  |
+| infinity                        | bool                                              |                  | NO       | true                  |    
+| interaction                     | bool                                              |                  | NO       | true                  |
+| autoStart                       | bool                                              |                  | NO       | true                  |
+| autoStartAfter                  | Duration                                          |                  | NO       | Duration.zero         |
+| restartAfterInteraction         | bool                                              |                  | NO       | true                  | 
+| restartAfterInteractionDuration | Duration                                          |                  | NO       | Duration(seconds: 3)  |
+| controller                      | MarqueerController                                |                  | NO       | null                  |
+| onChangeItemInViewPort          | void Function(index int)                          | callback         | NO       | null                  |
+| onInteraction                   | void Function()                                   | callback         | NO       | null                  |
+| onStarted                       | void Function()                                   | callback         | NO       | null                  |
+| onStopped                       | void Function()                                   | callback         | NO       | null                  |
+| itemBuilder                     | Widget? Function(BuildContext context, int index) | callback         | YES      | null                  |
+| itemCount                       | int                                               |                  | NO       | null                  |
+
+
 ```dart
 final controller = MarqueerController();
 
@@ -68,6 +72,24 @@ SizedBox(
     ),
 );
 ```
+
+Use with builder
+
+```dart
+SizedBox(
+height: 50,
+    child: Marqueer.builder(
+        itemCount: 200,
+        itemBuilder: (context, index) {
+            return Padding(
+                padding: EdgeInsets.all(4),
+                child: Text('index: $index'),
+            );
+        },
+    ),
+),
+```
+
 
 Basic usage
 
