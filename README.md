@@ -34,7 +34,7 @@ Transform to "Marquee" from any widget.
 | onChangeItemInViewPort          | void Function(index int) | callback         | NO       | null                  |
 | onInteraction                   | void Function()          | callback         | NO       | null                  |
 | onStarted                       | void Function()          | callback         | NO       | null                  |
-| onStoped                        | void Function()          | callback         | NO       | null                  |
+| onStopped                       | void Function()          | callback         | NO       | null                  |
 
 
 ```dart
