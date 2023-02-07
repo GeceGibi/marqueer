@@ -38,6 +38,32 @@ class _AppHomeState extends State<AppHome> {
           const _PostCard(),
           const SizedBox(height: 40),
           SizedBox(
+            height: 50,
+            child: Marqueer.builder(
+              itemCount: 200,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Text('index: $index'),
+                );
+              },
+            ),
+          ),
+          SizedBox(
+            height: 100,
+            child: Marqueer.builder(
+              pps: 100,
+              infinity: true,
+              direction: MarqueerDirection.ltr,
+              itemBuilder: (_, index) {
+                return Image.network(
+                  'https://api.lorem.space/image/game?w=300&h=300&t=$index',
+                  width: 100,
+                );
+              },
+            ),
+          ),
+          SizedBox(
             height: 150,
             child: Marqueer(
               pps: 60,

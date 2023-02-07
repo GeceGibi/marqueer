@@ -33,14 +33,52 @@ class Marqueer extends StatefulWidget {
     this.onStopped,
     this.separator,
     super.key,
-  }) : assert((() {
+  })  : assert((() {
           if (autoStartAfter > Duration.zero) {
             return autoStart;
           }
 
           return true;
         })(),
-            "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`");
+            "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`"),
+        itemBuilder = null,
+        itemCount = null;
+
+  Marqueer.builder({
+    required this.itemBuilder,
+    this.itemCount,
+    this.pps = 15.0,
+    this.infinity = false,
+    this.autoStart = true,
+    this.direction = MarqueerDirection.rtl,
+    this.interaction = true,
+    this.restartAfterInteractionDuration = const Duration(seconds: 3),
+    this.restartAfterInteraction = true,
+    this.onChangeItemInViewPort,
+    this.autoStartAfter = Duration.zero,
+    this.onInteraction,
+    this.controller,
+    this.onStarted,
+    this.onStopped,
+    this.separator,
+    super.key,
+  })  : assert((() {
+          if (autoStartAfter > Duration.zero) {
+            return autoStart;
+          }
+
+          return true;
+        })(),
+            "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`"),
+        assert((() {
+          if (itemCount != null) {
+            return !infinity;
+          }
+
+          return infinity;
+        })(),
+            "When `itemCount` was defined `infinity` must be `false`or when `itemCount` was `null`, `infinity` must be `true`"),
+        child = const SizedBox.shrink();
 
   /// Child
   final Widget child;
@@ -80,6 +118,10 @@ class Marqueer extends StatefulWidget {
   final void Function()? onStopped;
   final void Function()? onInteraction;
   final void Function(int index)? onChangeItemInViewPort;
+
+  /// Builder
+  final NullableIndexedWidgetBuilder? itemBuilder;
+  final int? itemCount;
 
   @override
   State<Marqueer> createState() => _MarqueerState();
@@ -251,6 +293,31 @@ class _MarqueerState extends State<Marqueer> {
   }
 
   bool get isWebOrDesktop => kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
+  bool get isReverse => widget.direction == MarqueerDirection.ltr;
+  bool get hasCustomBuilder => widget.itemBuilder != null;
+
+  Widget? _defaultItemBuilder(context, index) {
+    widget.onChangeItemInViewPort?.call(index);
+
+    if (hasCustomBuilder) {
+      return widget.itemBuilder!(context, index);
+    }
+
+    if (widget.separator != null && widget.infinity) {
+      final children = [widget.child];
+
+      children.insert(isReverse ? 0 : 1, widget.separator!);
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: children,
+      );
+    }
+
+    return widget.child;
+  }
 
   @override
   void dispose() {
@@ -267,7 +334,11 @@ class _MarqueerState extends State<Marqueer> {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    final isReverse = widget.direction == MarqueerDirection.ltr;
+    final itemCount = hasCustomBuilder
+        ? widget.itemCount
+        : widget.infinity
+            ? null
+            : 1;
 
     Widget body = ListView.builder(
       controller: controller,
@@ -277,25 +348,8 @@ class _MarqueerState extends State<Marqueer> {
       scrollDirection: Axis.horizontal,
       physics: physics,
       reverse: isReverse,
-      itemCount: widget.infinity ? null : 1,
-      itemBuilder: (context, index) {
-        widget.onChangeItemInViewPort?.call(index);
-
-        if (widget.separator != null && widget.infinity) {
-          final children = [widget.child];
-
-          children.insert(isReverse ? 0 : 1, widget.separator!);
-
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: children,
-          );
-        }
-
-        return widget.child;
-      },
+      itemCount: itemCount,
+      itemBuilder: _defaultItemBuilder,
     );
 
     if (isWebOrDesktop) {
