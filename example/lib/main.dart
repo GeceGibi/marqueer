@@ -38,18 +38,6 @@ class _AppHomeState extends State<AppHome> {
           const _PostCard(),
           const SizedBox(height: 40),
           SizedBox(
-            height: 50,
-            child: Marqueer.builder(
-              itemCount: 200,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Text('index: $index'),
-                );
-              },
-            ),
-          ),
-          SizedBox(
             height: 100,
             child: Marqueer.builder(
               pps: 100,
