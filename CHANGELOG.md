@@ -1,5 +1,8 @@
+## 1.2.1
+Fixed misspelled variable names. (thanks @Aboidrees)
+
 ## 1.2.0
-Imporoved desktop and web support.
+Improved desktop and web support.
 
 ## 1.1.1
 Added `autoStartAfter` property to `Marquuer` widget for auto start after specific duration
