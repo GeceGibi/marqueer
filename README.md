@@ -35,8 +35,6 @@ Transform to "Marquee" from any widget.
 | onInteraction                   | void Function()          | callback         | NO       | null                  |
 | onStarted                       | void Function()          | callback         | NO       | null                  |
 | onStopped                       | void Function()          | callback         | NO       | null                  |
-
-
 ```dart
 final controller = MarqueerController();
 
@@ -61,7 +59,7 @@ SizedBox(
         onStarted: () {
             print('on started callback');
         },
-        onStoped: () {
+        onStopped: () {
             print('on stopped callback');
         },
         child: const Text(
