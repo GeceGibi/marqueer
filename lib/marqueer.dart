@@ -30,7 +30,7 @@ class Marqueer extends StatefulWidget {
     this.onInteraction,
     this.controller,
     this.onStarted,
-    this.onStoped,
+    this.onStopped,
     this.separator,
     super.key,
   }) : assert((() {
@@ -66,7 +66,7 @@ class Marqueer extends StatefulWidget {
   /// auto start
   final bool autoStart;
 
-  /// Seperator widget
+  /// Separator widget
   final Widget? separator;
 
   /// Auto Start after duration
@@ -77,7 +77,7 @@ class Marqueer extends StatefulWidget {
 
   /// callbacks
   final void Function()? onStarted;
-  final void Function()? onStoped;
+  final void Function()? onStopped;
   final void Function()? onInteraction;
   final void Function(int index)? onChangeItemInViewPort;
 
@@ -151,7 +151,7 @@ class _MarqueerState extends State<Marqueer> {
     controller.jumpTo(controller.offset);
     offset = controller.offset;
 
-    widget.onStoped?.call();
+    widget.onStopped?.call();
   }
 
   bool calculateDistance() {
