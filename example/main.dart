@@ -12,10 +12,9 @@ class ExampleScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 0),
         children: [
           const _PostCard(),
-          const SizedBox(height: 40),
           SizedBox(
             height: 100,
             child: Marqueer.builder(
@@ -29,21 +28,7 @@ class ExampleScreen extends StatelessWidget {
               },
             ),
           ),
-          SizedBox(
-            height: 150,
-            child: Marqueer(
-              pps: 60,
-              infinity: false,
-              child: Row(
-                children: List<Widget>.generate(5, (index) {
-                  return Image.network(
-                    'https://api.lorem.space/image/game?w=300&h=300&t=$index',
-                    width: 150,
-                  );
-                }),
-              ),
-            ),
-          ),
+          const ExchangeBar(),
           SizedBox(
             height: 150,
             child: Marqueer(
@@ -111,6 +96,160 @@ class _PostCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class ExchangeBar extends StatelessWidget {
+  static const data = <Map<String, dynamic>>[
+    {
+      "id": "xu100_index",
+      "direction": -1,
+      "value": "5.212,38",
+      "change_percent": "%-0.93",
+      "title": "BIST 100",
+      "currency": ""
+    },
+    {
+      "id": "usdtry_curncy",
+      "direction": -1,
+      "value": "18,7993",
+      "change_percent": "%-0.32",
+      "title": "Dolar",
+      "currency": "₺"
+    },
+    {
+      "id": "eurtry_curncy",
+      "direction": 1,
+      "value": "20,0293",
+      "change_percent": "%0.24",
+      "title": "Euro",
+      "currency": "₺"
+    },
+    {
+      "id": "eurusd_curncy",
+      "direction": 1,
+      "value": "1,0636",
+      "change_percent": "%0.33",
+      "title": "EUR/USD",
+      "currency": "\$"
+    },
+    {
+      "id": "tahvil2y",
+      "direction": -1,
+      "value": "10,49",
+      "change_percent": "%-1.32",
+      "title": "Faiz",
+      "currency": ""
+    },
+    {
+      "id": "xau_curncy",
+      "direction": 1,
+      "value": "1.856,48",
+      "change_percent": "%1.12",
+      "title": "Altın Ons",
+      "currency": "\$"
+    },
+    {
+      "id": "co1_comdty",
+      "direction": 1,
+      "value": "85,83",
+      "change_percent": "%1.27",
+      "title": "Brent Petrol",
+      "currency": "\$"
+    },
+    {
+      "id": "bdiy_index",
+      "direction": 1,
+      "value": "1.211,00",
+      "change_percent": "%5.76",
+      "title": "Baltık Kuru Yük.",
+      "currency": "\$"
+    },
+    {
+      "id": "btcusdt",
+      "title": "Bitcoin",
+      "value": "22,430.00",
+      "change_percent": "%0.46",
+      "direction": 1,
+      "currency": "\$"
+    },
+    {
+      "id": "ethusdt",
+      "title": "Ethereum",
+      "value": "1,570.10",
+      "change_percent": "%0.4",
+      "direction": 1,
+      "currency": "\$"
+    },
+    {
+      "id": "gldgr",
+      "title": "Altın Gram",
+      "value": "1,127.08",
+      "change_percent": "%1.01",
+      "direction": 1,
+      "currency": "₺"
+    }
+  ];
+
+  const ExchangeBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 60,
+      child: Marqueer.builder(
+        itemBuilder: (context, index) {
+          var multiplier = index ~/ data.length;
+
+          var i = index;
+
+          if (multiplier > 0) {
+            i = index - (multiplier * data.length);
+          }
+
+          final item = data[i];
+
+          late Color color;
+
+          switch (item['direction']) {
+            case 1:
+              color = Colors.green;
+              break;
+
+            case -1:
+              color = Colors.red;
+              break;
+
+            default:
+              color = Colors.grey;
+              break;
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "${item['title']}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  "${item['value']} ${item['currency']}",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
