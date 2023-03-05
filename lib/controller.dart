@@ -8,7 +8,7 @@ class MarqueerController {
     _marquees.add(marqueer);
   }
 
-  void _deattach(_MarqueerState marqueer) {
+  void _detach(_MarqueerState marqueer) {
     _marquees.remove(marqueer);
   }
 
@@ -22,22 +22,22 @@ class MarqueerController {
 
   void start() {
     assert(hasClients, "Not found any attached marqueer widget");
-    for (var marq in _marquees) {
-      marq.start();
+    for (var state in _marquees) {
+      state.start();
     }
   }
 
   void stop() {
     assert(hasClients, "Not found any attached marqueer widget");
-    for (var marq in _marquees) {
-      marq.stop();
+    for (var state in _marquees) {
+      state.stop();
     }
   }
 
   void interactionEnabled(bool enabled) {
     assert(hasClients, "Not found any attached marqueer widget");
-    for (var marq in _marquees) {
-      marq.interactionEnabled(enabled);
+    for (var state in _marquees) {
+      state.interactionEnabled(enabled);
     }
   }
 }
