@@ -1,33 +1,12 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:marqueer/marqueer.dart';
 
-void main() {
-  runApp(const ExampleApp());
-}
+class ExampleScreen extends StatelessWidget {
+  const ExampleScreen({super.key});
 
-class ExampleApp extends StatelessWidget {
-  const ExampleApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Marquee Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const AppHome(),
-    );
-  }
-}
-
-class AppHome extends StatefulWidget {
-  const AppHome({Key? key}) : super(key: key);
-  @override
-  State<AppHome> createState() => _AppHomeState();
-}
-
-class _AppHomeState extends State<AppHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,8 +19,7 @@ class _AppHomeState extends State<AppHome> {
           SizedBox(
             height: 100,
             child: Marqueer.builder(
-              pps: 100,
-              infinity: true,
+              pps: 60,
               direction: MarqueerDirection.ltr,
               itemBuilder: (_, index) {
                 return Image.network(
@@ -88,41 +66,24 @@ class _AppHomeState extends State<AppHome> {
   }
 }
 
-class _PostCard extends StatefulWidget {
+class _PostCard extends StatelessWidget {
   const _PostCard({super.key});
-  @override
-  State<_PostCard> createState() => _PostCardState();
-}
-
-class _PostCardState extends State<_PostCard> {
-  final controller = MarqueerController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future.delayed(const Duration(seconds: 3), () {
-      controller.start();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final size = (mediaQuery.size.width * mediaQuery.devicePixelRatio).toInt();
+    final id = Random().nextInt(1000);
+
     return Stack(
       children: [
-        LayoutBuilder(builder: (context, consts) {
-          final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-          final size = (consts.maxWidth * pixelRatio).toInt();
-
-          return SizedBox(
-            height: consts.maxWidth,
-            width: consts.maxWidth,
-            child: Image.network(
-              'https://api.lorem.space/image/movie?w=$size&h=$size&t',
-              fit: BoxFit.cover,
-            ),
-          );
-        }),
+        AspectRatio(
+          aspectRatio: 1,
+          child: Image.network(
+            'https://api.lorem.space/image?w=$size&h=$size&t=$id',
+            fit: BoxFit.cover,
+          ),
+        ),
         Positioned(
           height: 42,
           bottom: 8,
@@ -130,12 +91,11 @@ class _PostCardState extends State<_PostCard> {
           right: 0,
           child: ClipRRect(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: ColoredBox(
                 color: const Color(0x66000000),
                 child: Marqueer(
-                  autoStart: false,
-                  controller: controller,
+                  autoStartAfter: const Duration(seconds: 3),
                   child: const Padding(
                     padding: EdgeInsets.all(12),
                     child: Text(

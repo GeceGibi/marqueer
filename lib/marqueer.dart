@@ -33,7 +33,7 @@ class Marqueer extends StatefulWidget {
     this.onStopped,
     this.separator,
     super.key,
-  })  : assert(child != null, 'Child can not be null'),
+  })  : assert(child != null, 'Child can\'t be null'),
         assert((() {
           if (autoStartAfter > Duration.zero) {
             return autoStart;
@@ -49,7 +49,6 @@ class Marqueer extends StatefulWidget {
     required this.itemBuilder,
     this.itemCount,
     this.pps = 15.0,
-    this.infinity = false,
     this.autoStart = true,
     this.direction = MarqueerDirection.rtl,
     this.interaction = true,
@@ -63,7 +62,7 @@ class Marqueer extends StatefulWidget {
     this.onStopped,
     this.separator,
     super.key,
-  })  : assert(itemBuilder != null, 'itemBuilder can not be null'),
+  })  : assert(itemBuilder != null, 'itemBuilder can\'t be null'),
         assert((() {
           if (autoStartAfter > Duration.zero) {
             return autoStart;
@@ -72,15 +71,8 @@ class Marqueer extends StatefulWidget {
           return true;
         })(),
             "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`"),
-        assert((() {
-          if (itemCount != null) {
-            return !infinity;
-          }
-
-          return infinity;
-        })(),
-            "When `itemCount` was defined `infinity` must be `false`or when `itemCount` was `null`, `infinity` must be `true`"),
-        child = null;
+        child = null,
+        infinity = itemCount == null;
 
   /// Child
   final Widget? child;
@@ -143,9 +135,18 @@ class _MarqueerState extends State<Marqueer> {
   Timer? timerInteraction;
 
   /// default delay added for wait scroll anim. end;
-  Duration get duration => Duration(
+  Duration get duration {
+    try {
+      return Duration(
         milliseconds: ((step / widget.pps) * 1000).round(),
       );
+    } catch (e) {
+      print('step: $step');
+      print('widget.pps: ${widget.pps}');
+    }
+
+    return Duration(seconds: 10);
+  }
 
   void animate() {
     controller.animateTo(
@@ -211,7 +212,7 @@ class _MarqueerState extends State<Marqueer> {
     final random = Random();
 
     // Has scrollable content
-    if (maxPos > 0) {
+    if (maxPos > 0 && maxPos.isFinite) {
       switch (interactionDirection) {
         case ScrollDirection.idle:
 
@@ -219,8 +220,7 @@ class _MarqueerState extends State<Marqueer> {
           interactionDirection = random.nextBool()
               ? ScrollDirection.forward
               : ScrollDirection.reverse;
-          calculateDistance();
-          break;
+          return calculateDistance();
 
         case ScrollDirection.forward:
           final isStart = currentPos == 0;
@@ -235,7 +235,7 @@ class _MarqueerState extends State<Marqueer> {
           break;
       }
 
-      return true;
+      return step.isFinite;
     }
 
     return false;
@@ -267,7 +267,7 @@ class _MarqueerState extends State<Marqueer> {
     animating = false;
     widget.onInteraction?.call();
 
-    /// Clear prev timer if setted
+    /// Clear prev timer if defined
     timerInteraction?.cancel();
     timerLoop?.cancel();
   }
@@ -298,25 +298,31 @@ class _MarqueerState extends State<Marqueer> {
   bool get isReverse => widget.direction == MarqueerDirection.ltr;
   bool get hasCustomBuilder => widget.itemBuilder != null;
 
-  Widget? _defaultItemBuilder(context, index) {
-    widget.onChangeItemInViewPort?.call(index);
+  Widget? _defaultItemBuilder(context, int index) {
+    final actualIndex = widget.itemCount != null ? index ~/ 2 : index;
+
+    widget.onChangeItemInViewPort?.call(actualIndex);
+
+    if (index.isOdd && widget.separator != null && widget.infinity) {
+      return widget.separator;
+    }
 
     if (hasCustomBuilder) {
-      return widget.itemBuilder!(context, index);
+      return widget.itemBuilder!(context, actualIndex);
     }
 
-    if (widget.separator != null && widget.infinity) {
-      final children = [widget.child!];
+    // if (widget.separator != null && widget.infinity) {
+    //   final children = [widget.child!];
 
-      children.insert(isReverse ? 0 : 1, widget.separator!);
+    //   children.insert(isReverse ? 0 : 1, widget.separator!);
 
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: children,
-      );
-    }
+    //   return Row(
+    //     mainAxisSize: MainAxisSize.min,
+    //     mainAxisAlignment: MainAxisAlignment.center,
+    //     crossAxisAlignment: CrossAxisAlignment.center,
+    //     children: children,
+    //   );
+    // }
 
     return widget.child;
   }
@@ -326,7 +332,7 @@ class _MarqueerState extends State<Marqueer> {
     controller.dispose();
     timerLoop?.cancel();
     timerInteraction?.cancel();
-    widget.controller?._deattach(this);
+    widget.controller?._detach(this);
     super.dispose();
   }
 
@@ -336,22 +342,23 @@ class _MarqueerState extends State<Marqueer> {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    final itemCount = hasCustomBuilder
-        ? widget.itemCount
-        : widget.infinity
-            ? null
-            : 1;
+    var itemCount = widget.infinity ? null : 1;
+
+    if (hasCustomBuilder) {
+      itemCount =
+          widget.itemCount != null ? max(0, (widget.itemCount! * 2) - 1) : null;
+    }
 
     Widget body = ListView.builder(
-      controller: controller,
-      padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      addAutomaticKeepAlives: false,
-      scrollDirection: Axis.horizontal,
       physics: physics,
       reverse: isReverse,
       itemCount: itemCount,
+      controller: controller,
+      padding: EdgeInsets.zero,
+      addAutomaticKeepAlives: false,
+      scrollDirection: Axis.horizontal,
       itemBuilder: _defaultItemBuilder,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     );
 
     if (isWebOrDesktop) {
