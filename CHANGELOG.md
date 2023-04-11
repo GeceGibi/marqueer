@@ -1,7 +1,14 @@
 
+
+## 1.3.2
+Fix issue [5](https://github.com/GeceGibi/marqueer/issues/5).
+
+## 1.3.1
+Updated `example` screen widgets.
+Cleaned up example project.
+
 ## 1.3.0
 Added `Marqueer.builder` for dynamic item build. [#1](https://github.com/GeceGibi/marqueer/issues/1)
-> When using `Marqueer.builder` if `itemCount` specified, `infinity` attribute must be `false` or if `itemCount` was a null `infinity` must be true.
 
 ## 1.2.1
 Fixed misspelled variable names. (thanks @Aboidrees)

@@ -114,7 +114,7 @@ class Marqueer extends StatefulWidget {
   final void Function(int index)? onChangeItemInViewPort;
 
   /// Builder
-  final NullableIndexedWidgetBuilder? itemBuilder;
+  final Widget Function(BuildContext context, int index)? itemBuilder;
   final int? itemCount;
 
   @override
@@ -135,18 +135,9 @@ class _MarqueerState extends State<Marqueer> {
   Timer? timerInteraction;
 
   /// default delay added for wait scroll anim. end;
-  Duration get duration {
-    try {
-      return Duration(
+  Duration get duration => Duration(
         milliseconds: ((step / widget.pps) * 1000).round(),
       );
-    } catch (e) {
-      print('step: $step');
-      print('widget.pps: ${widget.pps}');
-    }
-
-    return Duration(seconds: 10);
-  }
 
   void animate() {
     controller.animateTo(
@@ -298,33 +289,20 @@ class _MarqueerState extends State<Marqueer> {
   bool get isReverse => widget.direction == MarqueerDirection.ltr;
   bool get hasCustomBuilder => widget.itemBuilder != null;
 
-  Widget? _defaultItemBuilder(context, int index) {
-    final actualIndex = widget.itemCount != null ? index ~/ 2 : index;
+  Widget _defaultItemBuilder(BuildContext context, int index) {
+    final actualIndex = hasCustomBuilder ? index ~/ 2 : index;
 
     widget.onChangeItemInViewPort?.call(actualIndex);
 
-    if (index.isOdd && widget.separator != null && widget.infinity) {
-      return widget.separator;
+    if (index.isOdd && widget.separator != null) {
+      return widget.separator!;
     }
 
     if (hasCustomBuilder) {
       return widget.itemBuilder!(context, actualIndex);
     }
 
-    // if (widget.separator != null && widget.infinity) {
-    //   final children = [widget.child!];
-
-    //   children.insert(isReverse ? 0 : 1, widget.separator!);
-
-    //   return Row(
-    //     mainAxisSize: MainAxisSize.min,
-    //     mainAxisAlignment: MainAxisAlignment.center,
-    //     crossAxisAlignment: CrossAxisAlignment.center,
-    //     children: children,
-    //   );
-    // }
-
-    return widget.child;
+    return widget.child!;
   }
 
   @override
