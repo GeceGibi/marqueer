@@ -32,6 +32,7 @@ class Marqueer extends StatefulWidget {
     this.onStarted,
     this.onStopped,
     this.separatorBuilder,
+    this.padding = EdgeInsets.zero,
     super.key,
   })  : assert(child != null, 'Child can\'t be null'),
         assert((() {
@@ -61,6 +62,7 @@ class Marqueer extends StatefulWidget {
     this.onStarted,
     this.onStopped,
     this.separatorBuilder,
+    this.padding = EdgeInsets.zero,
     super.key,
   })  : assert(itemBuilder != null, 'itemBuilder can\'t be null'),
         assert((() {
@@ -79,6 +81,9 @@ class Marqueer extends StatefulWidget {
 
   /// Direction
   final MarqueerDirection direction;
+
+  /// List View Padding
+  final EdgeInsets padding;
 
   /// Pixel Per Second
   final double pps;
@@ -288,18 +293,25 @@ class _MarqueerState extends State<Marqueer> {
   bool get isWebOrDesktop => kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
   bool get isReverse => widget.direction == MarqueerDirection.ltr;
   bool get hasCustomBuilder => widget.itemBuilder != null;
+  bool get hasSeparatorBuilder => widget.separatorBuilder != null;
 
-  Widget _defaultItemBuilder(BuildContext context, int index) {
-    final actualIndex = hasCustomBuilder ? index ~/ 2 : index;
+  Widget _defaultItemBuilder(BuildContext context, int i) {
+    final int index;
 
-    widget.onChangeItemInViewPort?.call(actualIndex);
+    if (hasCustomBuilder && hasSeparatorBuilder) {
+      index = i ~/ 2;
+    } else {
+      index = i;
+    }
 
-    if (index.isOdd && widget.separatorBuilder != null) {
-      return widget.separatorBuilder!(context, actualIndex);
+    widget.onChangeItemInViewPort?.call(index);
+
+    if (hasSeparatorBuilder && index.isOdd) {
+      return widget.separatorBuilder!(context, index);
     }
 
     if (hasCustomBuilder) {
-      return widget.itemBuilder!(context, actualIndex);
+      return widget.itemBuilder!(context, index);
     }
 
     return widget.child!;
@@ -320,11 +332,12 @@ class _MarqueerState extends State<Marqueer> {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    var itemCount = widget.infinity ? null : 1;
+    int? itemCount = widget.infinity ? null : 1;
 
-    if (hasCustomBuilder) {
-      itemCount =
-          widget.itemCount != null ? max(0, (widget.itemCount! * 2) - 1) : null;
+    if (hasCustomBuilder && widget.itemCount != null) {
+      itemCount = widget.separatorBuilder != null
+          ? max(0, (widget.itemCount! * 2) - 1)
+          : widget.itemCount;
     }
 
     Widget body = ListView.builder(
@@ -332,7 +345,7 @@ class _MarqueerState extends State<Marqueer> {
       reverse: isReverse,
       itemCount: itemCount,
       controller: controller,
-      padding: EdgeInsets.zero,
+      padding: widget.padding,
       addAutomaticKeepAlives: false,
       scrollDirection: Axis.horizontal,
       itemBuilder: _defaultItemBuilder,

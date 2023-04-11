@@ -2,7 +2,8 @@
 
 ## 1.4.0
 Fixed issue [5](https://github.com/GeceGibi/marqueer/issues/5).\
-Breaking change: updated `Widget? separator` argument to `Widget separatorBuilder(BuildContext, int)` method.
+Breaking change: updated `Widget? separator` argument to `Widget separatorBuilder(BuildContext, int)` method.\
+Added `padding` argument. See README.md
 
 ## 1.3.1
 Updated `example` screen widgets\

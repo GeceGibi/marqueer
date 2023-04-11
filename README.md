@@ -23,6 +23,7 @@ Transform to "Marquee" from any widget.
 | child                           | Widget                                            |                  | YES      | -                     |
 | pps                             | double                                            | Pixel Per Second | NO       | 15.0                  |
 | direction                       | enum                                              |                  | NO       | MarqueerDirection.rtl |
+| padding                         | EdgeInsets                                        | ListView Padding | NO       | EdgeInsets.zero       |
 | separatorBuilder                | Widget Function(BuildContext context, int index)  |                  | NO       | null                  |
 | infinity                        | bool                                              |                  | NO       | true                  |    
 | interaction                     | bool                                              |                  | NO       | true                  |
