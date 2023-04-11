@@ -78,7 +78,7 @@ Use with builder
 
 ```dart
 SizedBox(
-height: 50,
+    height: 50,
     child: Marqueer.builder(
         itemCount: 200,
         itemBuilder: (context, index) {
@@ -97,7 +97,7 @@ Basic usage
 ```dart
 SizedBox(
     height: 50,
-    child:Marqueer(
+    child: Marqueer(
         child: AnyWidget()
     )
 )
