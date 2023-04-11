@@ -17,7 +17,8 @@ enum MarqueerDirection {
 
 class Marqueer extends StatefulWidget {
   Marqueer({
-    required this.child,
+    required Widget child,
+    Widget Function(BuildContext context, int index)? separatorBuilder,
     this.pps = 15.0,
     this.infinity = true,
     this.autoStart = true,
@@ -31,11 +32,9 @@ class Marqueer extends StatefulWidget {
     this.controller,
     this.onStarted,
     this.onStopped,
-    this.separatorBuilder,
     this.padding = EdgeInsets.zero,
     super.key,
-  })  : assert(child != null, 'Child can\'t be null'),
-        assert((() {
+  })  : assert((() {
           if (autoStartAfter > Duration.zero) {
             return autoStart;
           }
@@ -43,12 +42,35 @@ class Marqueer extends StatefulWidget {
           return true;
         })(),
             "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`"),
-        itemBuilder = null,
-        itemCount = null;
+        delegate = SliverChildBuilderDelegate(
+          (context, index) {
+            onChangeItemInViewPort?.call(index);
+
+            if (separatorBuilder != null) {
+              final children = [child];
+
+              if (direction == MarqueerDirection.rtl) {
+                children.add(separatorBuilder(context, index));
+              } else {
+                children.insert(0, separatorBuilder(context, index));
+              }
+
+              return Flex(
+                direction: Axis.horizontal,
+                children: children,
+              );
+            }
+
+            return child;
+          },
+          childCount: infinity ? null : 1,
+          addAutomaticKeepAlives: !infinity,
+        );
 
   Marqueer.builder({
-    required this.itemBuilder,
-    this.itemCount,
+    required Widget Function(BuildContext context, int index) itemBuilder,
+    Widget Function(BuildContext context, int index)? separatorBuilder,
+    int? itemCount,
     this.pps = 15.0,
     this.autoStart = true,
     this.direction = MarqueerDirection.rtl,
@@ -61,23 +83,86 @@ class Marqueer extends StatefulWidget {
     this.controller,
     this.onStarted,
     this.onStopped,
-    this.separatorBuilder,
     this.padding = EdgeInsets.zero,
     super.key,
-  })  : assert(itemBuilder != null, 'itemBuilder can\'t be null'),
-        assert((() {
+  })  : assert((() {
           if (autoStartAfter > Duration.zero) {
             return autoStart;
           }
 
           return true;
         })(),
-            "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`"),
-        child = null,
-        infinity = itemCount == null;
+            "if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`"),
+        infinity = itemCount == null,
+        delegate = SliverChildBuilderDelegate(
+          (context, index) {
+            onChangeItemInViewPort?.call(index);
 
-  /// Child
-  final Widget? child;
+            final widget = itemBuilder(context, index);
+
+            if (separatorBuilder != null && index + 1 != itemCount) {
+              final children = [widget];
+
+              if (direction == MarqueerDirection.rtl) {
+                children.add(separatorBuilder(context, index));
+              } else {
+                children.insert(0, separatorBuilder(context, index));
+              }
+
+              return Flex(
+                direction: Axis.horizontal,
+                children: children,
+              );
+            }
+
+            return widget;
+          },
+          childCount: itemCount,
+          addAutomaticKeepAlives: itemCount != null,
+        );
+
+  // Marqueer.separated({
+  //   required Widget Function(BuildContext context, int index) separatorBuilder,
+  //   required Widget Function(BuildContext context, int index) itemBuilder,
+  //   required int itemCount,
+  //   this.pps = 15.0,
+  //   this.autoStart = true,
+  //   this.direction = MarqueerDirection.rtl,
+  //   this.interaction = true,
+  //   this.restartAfterInteractionDuration = const Duration(seconds: 3),
+  //   this.restartAfterInteraction = true,
+  //   this.onChangeItemInViewPort,
+  //   this.autoStartAfter = Duration.zero,
+  //   this.onInteraction,
+  //   this.controller,
+  //   this.onStarted,
+  //   this.onStopped,
+  //   this.padding = EdgeInsets.zero,
+  //   super.key,
+  // })  : assert((() {
+  //         if (autoStartAfter > Duration.zero) {
+  //           return autoStart;
+  //         }
+
+  //         return true;
+  //       })(),
+  //           "if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`"),
+  //       infinity = false,
+  //       delegate = SliverChildBuilderDelegate(
+  //         (context, index) {
+  //           final itemIndex = index ~/ 2;
+
+  //           if (index.isEven) {
+  //             return itemBuilder(context, itemIndex);
+  //           } else {
+  //             return separatorBuilder(context, itemIndex);
+  //           }
+  //         },
+  //         childCount: max(0, itemCount * 2 - 1),
+  //         semanticIndexCallback: (_, index) => index.isEven ? index ~/ 2 : null,
+  //       );
+
+  final SliverChildDelegate delegate;
 
   /// Direction
   final MarqueerDirection direction;
@@ -103,9 +188,6 @@ class Marqueer extends StatefulWidget {
   /// auto start
   final bool autoStart;
 
-  /// Separator widget
-  final Widget Function(BuildContext, int)? separatorBuilder;
-
   /// Auto Start after duration
   final Duration autoStartAfter;
 
@@ -117,10 +199,6 @@ class Marqueer extends StatefulWidget {
   final void Function()? onStopped;
   final void Function()? onInteraction;
   final void Function(int index)? onChangeItemInViewPort;
-
-  /// Builder
-  final Widget Function(BuildContext context, int index)? itemBuilder;
-  final int? itemCount;
 
   @override
   State<Marqueer> createState() => _MarqueerState();
@@ -292,30 +370,6 @@ class _MarqueerState extends State<Marqueer> {
 
   bool get isWebOrDesktop => kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
   bool get isReverse => widget.direction == MarqueerDirection.ltr;
-  bool get hasCustomBuilder => widget.itemBuilder != null;
-  bool get hasSeparatorBuilder => widget.separatorBuilder != null;
-
-  Widget _defaultItemBuilder(BuildContext context, int i) {
-    final int index;
-
-    if (hasCustomBuilder && hasSeparatorBuilder && widget.itemCount != null) {
-      index = i ~/ 2;
-    } else {
-      index = i;
-    }
-
-    widget.onChangeItemInViewPort?.call(index);
-
-    if (hasSeparatorBuilder && widget.itemCount != null && index.isOdd) {
-      return widget.separatorBuilder!(context, index);
-    }
-
-    if (hasCustomBuilder) {
-      return widget.itemBuilder!(context, index);
-    } else {
-      return widget.child!;
-    }
-  }
 
   @override
   void dispose() {
@@ -332,23 +386,14 @@ class _MarqueerState extends State<Marqueer> {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    int? itemCount = widget.infinity ? null : 1;
-
-    if (hasCustomBuilder && widget.itemCount != null) {
-      itemCount = widget.separatorBuilder != null
-          ? max(0, (widget.itemCount! * 2) - 1)
-          : widget.itemCount;
-    }
-
-    Widget body = ListView.builder(
+    Widget body = ListView.custom(
+      childrenDelegate: widget.delegate,
       physics: physics,
       reverse: isReverse,
-      itemCount: itemCount,
       controller: controller,
       padding: widget.padding,
-      addAutomaticKeepAlives: false,
       scrollDirection: Axis.horizontal,
-      itemBuilder: _defaultItemBuilder,
+      semanticChildCount: widget.delegate.estimatedChildCount,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     );
 

@@ -199,9 +199,9 @@ class ExchangeBar extends StatelessWidget {
     return SizedBox(
       height: 60,
       child: Marqueer.builder(
-        separatorBuilder: (_, index) => const Center(
-          child: Text('      ~     '),
-        ),
+        // separatorBuilder: (_, index) => const Center(
+        //   child: Text('      ~     '),
+        // ),
         itemBuilder: (context, index) {
           var multiplier = index ~/ data.length;
 
