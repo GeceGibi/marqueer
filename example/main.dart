@@ -22,7 +22,7 @@ class ExampleScreen extends StatelessWidget {
               direction: MarqueerDirection.ltr,
               itemBuilder: (_, index) {
                 return Image.network(
-                  'https://api.lorem.space/image/game?w=300&h=300&t=$index',
+                  'https://picsum.photos/300/300?random=$index',
                   width: 100,
                 );
               },
@@ -31,18 +31,16 @@ class ExampleScreen extends StatelessWidget {
           const ExchangeBar(),
           SizedBox(
             height: 150,
-            child: Marqueer(
+            child: Marqueer.builder(
               pps: 30,
               direction: MarqueerDirection.ltr,
               autoStartAfter: const Duration(seconds: 2),
-              child: Row(
-                children: List<Widget>.generate(20, (index) {
-                  return Image.network(
-                    'https://api.lorem.space/image/fashion?w=300&h=300&t=$index',
-                    width: 150,
-                  );
-                }),
-              ),
+              itemBuilder: (BuildContext context, int index) {
+                return Image.network(
+                  'https://picsum.photos/300/300?random=$index',
+                  width: 150,
+                );
+              },
             ),
           )
         ],
@@ -65,7 +63,7 @@ class _PostCard extends StatelessWidget {
         AspectRatio(
           aspectRatio: 1,
           child: Image.network(
-            'https://api.lorem.space/image?w=$size&h=$size&t=$id',
+            'https://picsum.photos/$size/$size?random=$id',
             fit: BoxFit.cover,
           ),
         ),
@@ -199,6 +197,9 @@ class ExchangeBar extends StatelessWidget {
     return SizedBox(
       height: 60,
       child: Marqueer.builder(
+        separatorBuilder: (_, index) => const Center(
+          child: Text('      ~     '),
+        ),
         itemBuilder: (context, index) {
           var multiplier = index ~/ data.length;
 

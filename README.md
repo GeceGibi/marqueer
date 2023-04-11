@@ -23,7 +23,8 @@ Transform to "Marquee" from any widget.
 | child                           | Widget                                            |                  | YES      | -                     |
 | pps                             | double                                            | Pixel Per Second | NO       | 15.0                  |
 | direction                       | enum                                              |                  | NO       | MarqueerDirection.rtl |
-| separator                       | Widget                                            |                  | NO       | null                  |
+| padding                         | EdgeInsets                                        | ListView Padding | NO       | EdgeInsets.zero       |
+| separatorBuilder                | Widget Function(BuildContext context, int index)  |                  | NO       | null                  |
 | infinity                        | bool                                              |                  | NO       | true                  |    
 | interaction                     | bool                                              |                  | NO       | true                  |
 | autoStart                       | bool                                              |                  | NO       | true                  |
@@ -35,7 +36,7 @@ Transform to "Marquee" from any widget.
 | onInteraction                   | void Function()                                   | callback         | NO       | null                  |
 | onStarted                       | void Function()                                   | callback         | NO       | null                  |
 | onStopped                       | void Function()                                   | callback         | NO       | null                  |
-| itemBuilder                     | Widget? Function(BuildContext context, int index) | callback         | YES      | null                  |
+| itemBuilder                     | Widget Function(BuildContext context, int index)  | callback         | YES      | null                  |
 | itemCount                       | int                                               |                  | NO       | null                  |
 
 
@@ -77,7 +78,7 @@ Use with builder
 
 ```dart
 SizedBox(
-height: 50,
+    height: 50,
     child: Marqueer.builder(
         itemCount: 200,
         itemBuilder: (context, index) {
@@ -96,7 +97,7 @@ Basic usage
 ```dart
 SizedBox(
     height: 50,
-    child:Marqueer(
+    child: Marqueer(
         child: AnyWidget()
     )
 )
