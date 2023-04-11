@@ -41,7 +41,7 @@ class Marqueer extends StatefulWidget {
 
           return true;
         })(),
-            "if `autoStartAfter` duration bigger than `zero`, `autoStart` must be `true`"),
+            "if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`"),
         delegate = SliverChildBuilderDelegate(
           (context, index) {
             onChangeItemInViewPort?.call(index);
