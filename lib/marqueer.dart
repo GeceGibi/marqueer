@@ -31,7 +31,7 @@ class Marqueer extends StatefulWidget {
     this.controller,
     this.onStarted,
     this.onStopped,
-    this.separator,
+    this.separatorBuilder,
     super.key,
   })  : assert(child != null, 'Child can\'t be null'),
         assert((() {
@@ -60,7 +60,7 @@ class Marqueer extends StatefulWidget {
     this.controller,
     this.onStarted,
     this.onStopped,
-    this.separator,
+    this.separatorBuilder,
     super.key,
   })  : assert(itemBuilder != null, 'itemBuilder can\'t be null'),
         assert((() {
@@ -99,7 +99,7 @@ class Marqueer extends StatefulWidget {
   final bool autoStart;
 
   /// Separator widget
-  final Widget? separator;
+  final Widget Function(BuildContext, int)? separatorBuilder;
 
   /// Auto Start after duration
   final Duration autoStartAfter;
@@ -294,8 +294,8 @@ class _MarqueerState extends State<Marqueer> {
 
     widget.onChangeItemInViewPort?.call(actualIndex);
 
-    if (index.isOdd && widget.separator != null) {
-      return widget.separator!;
+    if (index.isOdd && widget.separatorBuilder != null) {
+      return widget.separatorBuilder!(context, actualIndex);
     }
 
     if (hasCustomBuilder) {

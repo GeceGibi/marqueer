@@ -1,10 +1,11 @@
 
 
-## 1.3.2
-Fix issue [5](https://github.com/GeceGibi/marqueer/issues/5).
+## 1.4.0
+Fixed issue [5](https://github.com/GeceGibi/marqueer/issues/5).\
+Breaking change: updated `Widget? separator` argument to `Widget separatorBuilder(BuildContext, int)` method.
 
 ## 1.3.1
-Updated `example` screen widgets.
+Updated `example` screen widgets\
 Cleaned up example project.
 
 ## 1.3.0
