@@ -298,7 +298,7 @@ class _MarqueerState extends State<Marqueer> {
   Widget _defaultItemBuilder(BuildContext context, int i) {
     final int index;
 
-    if (hasCustomBuilder && hasSeparatorBuilder) {
+    if (hasCustomBuilder && hasSeparatorBuilder && widget.itemCount != null) {
       index = i ~/ 2;
     } else {
       index = i;
@@ -306,15 +306,15 @@ class _MarqueerState extends State<Marqueer> {
 
     widget.onChangeItemInViewPort?.call(index);
 
-    if (hasSeparatorBuilder && index.isOdd) {
+    if (hasSeparatorBuilder && widget.itemCount != null && index.isOdd) {
       return widget.separatorBuilder!(context, index);
     }
 
     if (hasCustomBuilder) {
       return widget.itemBuilder!(context, index);
+    } else {
+      return widget.child!;
     }
-
-    return widget.child!;
   }
 
   @override
