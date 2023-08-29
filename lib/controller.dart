@@ -48,7 +48,13 @@ class MarqueerController {
   }) async {
     assert(hasClients, "Not found any attached marqueer widget");
     await Future.wait(
-      _marquees.map((state) async => state.animateTo(offset)),
+      _marquees.map(
+        (state) async => state.animateTo(
+          offset,
+          duration: duration,
+          curve: curve,
+        ),
+      ),
     );
   }
 }
