@@ -40,4 +40,15 @@ class MarqueerController {
       state.interactionEnabled(enabled);
     }
   }
+
+  Future<void> animateTo(
+    double offset, {
+    Duration duration = const Duration(milliseconds: 300),
+    Curve curve = Curves.linear,
+  }) async {
+    assert(hasClients, "Not found any attached marqueer widget");
+    await Future.wait(
+      _marquees.map((state) async => state.animateTo(offset)),
+    );
+  }
 }

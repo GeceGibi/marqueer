@@ -273,6 +273,22 @@ class _MarqueerState extends State<Marqueer> {
     widget.onStopped?.call();
   }
 
+  Future<void> animateTo(
+    double distance, {
+    Duration duration = const Duration(milliseconds: 300),
+    Curve curve = Curves.linear,
+  }) async {
+    stop();
+
+    await controller.animateTo(
+      controller.offset + distance,
+      duration: duration,
+      curve: curve,
+    );
+
+    start();
+  }
+
   bool calculateDistance() {
     final currentPos = controller.offset;
     final maxPos = controller.position.maxScrollExtent;
