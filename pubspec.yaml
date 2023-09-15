@@ -1,11 +1,10 @@
 name: marqueer
 description: Transform to "Marquee" from any widget.
-version: 1.4.0
+version: 1.4.1
 homepage: https://github.com/GeceGibi/marqueer
 
 environment:
-  sdk: '>=2.18.4 <3.0.0'
-  flutter: ">=1.17.0"
+  sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
   flutter:

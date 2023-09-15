@@ -34,6 +34,20 @@ class MarqueerController {
     }
   }
 
+  void forward() {
+    assert(hasClients, "Not found any attached marqueer widget");
+    for (var state in _marquees) {
+      state.forward();
+    }
+  }
+
+  void backward() {
+    assert(hasClients, "Not found any attached marqueer widget");
+    for (var state in _marquees) {
+      state.backward();
+    }
+  }
+
   void interactionEnabled(bool enabled) {
     assert(hasClients, "Not found any attached marqueer widget");
     for (var state in _marquees) {

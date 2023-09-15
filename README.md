@@ -45,6 +45,8 @@ final controller = MarqueerController();
 
 /// controller.start()
 /// controller.stop()
+/// controller.forward()
+/// controller.backward()
 /// controller.interactionEnabled(false)
 
 SizedBox(
