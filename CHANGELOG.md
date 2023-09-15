@@ -1,5 +1,8 @@
 
 
+## 1.4.1
+Added `forward()` and  `backward()` methods to controller.
+
 ## 1.4.0
 Fixed issue [5](https://github.com/GeceGibi/marqueer/issues/5).\
 Breaking change: updated `Widget? separator` argument to `Widget separatorBuilder(BuildContext, int)` method.\

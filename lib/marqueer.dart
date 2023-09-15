@@ -219,7 +219,7 @@ class _MarqueerState extends State<Marqueer> {
 
   /// default delay added for wait scroll anim. end;
   Duration get duration => Duration(
-        milliseconds: ((step / widget.pps) * 1000).round(),
+        milliseconds: ((step.abs() / widget.pps) * 1000).round(),
       );
 
   void animate() {
@@ -230,17 +230,27 @@ class _MarqueerState extends State<Marqueer> {
     );
   }
 
-  void start() {
+  void start({double forStep = 10000.0}) {
     if (animating || !mounted) {
       return;
     }
 
-    if (calculateDistance()) {
+    if (calculateDistance(forStep: forStep)) {
       animating = true;
       animate();
       createLoop();
       widget.onStarted?.call();
     }
+  }
+
+  void forward() {
+    stop();
+    start();
+  }
+
+  void backward() {
+    stop();
+    start(forStep: -controller.offset);
   }
 
   /// Duration calculating after every interaction
@@ -273,13 +283,13 @@ class _MarqueerState extends State<Marqueer> {
     widget.onStopped?.call();
   }
 
-  bool calculateDistance() {
+  bool calculateDistance({double forStep = 10000.0}) {
     final currentPos = controller.offset;
     final maxPos = controller.position.maxScrollExtent;
 
     if (widget.infinity) {
       offset = currentPos;
-      step = 10000.0;
+      step = forStep;
       return true;
     }
 
@@ -368,8 +378,8 @@ class _MarqueerState extends State<Marqueer> {
     });
   }
 
-  bool get isWebOrDesktop => kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
-  bool get isReverse => widget.direction == MarqueerDirection.ltr;
+  final isWebOrDesktop = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
+  late var isReverse = widget.direction == MarqueerDirection.ltr;
 
   @override
   void dispose() {
