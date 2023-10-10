@@ -33,6 +33,7 @@ class Marqueer extends StatefulWidget {
     this.onStarted,
     this.onStopped,
     this.padding = EdgeInsets.zero,
+    this.axis = Axis.horizontal,
     super.key,
   })  : assert((() {
           if (autoStartAfter > Duration.zero) {
@@ -84,6 +85,7 @@ class Marqueer extends StatefulWidget {
     this.onStarted,
     this.onStopped,
     this.padding = EdgeInsets.zero,
+    this.axis = Axis.horizontal,
     super.key,
   })  : assert((() {
           if (autoStartAfter > Duration.zero) {
@@ -193,6 +195,9 @@ class Marqueer extends StatefulWidget {
 
   ///
   final bool infinity;
+
+  /// Direction of view
+  final Axis axis;
 
   /// callbacks
   final void Function()? onStarted;
@@ -402,7 +407,7 @@ class _MarqueerState extends State<Marqueer> {
       reverse: isReverse,
       controller: controller,
       padding: widget.padding,
-      scrollDirection: Axis.horizontal,
+      scrollDirection: widget.axis,
       semanticChildCount: widget.delegate.estimatedChildCount,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     );
