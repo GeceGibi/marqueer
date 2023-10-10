@@ -3,10 +3,10 @@ library marqueer;
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 part 'controller.dart';
 
@@ -408,10 +408,13 @@ class _MarqueerState extends State<Marqueer> {
     );
 
     if (isWebOrDesktop) {
-      body = MouseRegion(
-        onEnter: (_) => stop(),
-        onExit: (_) => start(),
-        child: body,
+      body = ScrollConfiguration(
+        behavior: _WebAndDesktopMouseDragBehavior(),
+        child: MouseRegion(
+          onEnter: (_) => stop(),
+          onExit: (_) => start(),
+          child: body,
+        ),
       );
     }
 
@@ -423,5 +426,15 @@ class _MarqueerState extends State<Marqueer> {
         child: body,
       ),
     );
+  }
+}
+
+class _WebAndDesktopMouseDragBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices {
+    return {
+      PointerDeviceKind.touch,
+      PointerDeviceKind.mouse,
+    };
   }
 }
