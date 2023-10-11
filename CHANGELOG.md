@@ -1,4 +1,6 @@
 
+## 1.4.2
+Added mouse swipe support for web [#10](https://github.com/GeceGibi/marqueer/issues/10)
 
 ## 1.4.1
 Added `forward()` and  `backward()` methods to controller.
