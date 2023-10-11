@@ -10,9 +10,20 @@ import 'package:flutter/rendering.dart';
 
 part 'controller.dart';
 
+const _kDefaultStep = 10000.0;
+
 enum MarqueerDirection {
+  /// Right to Left
   rtl,
+
+  /// Left to Right
   ltr,
+
+  /// Top to Bottom
+  ttb,
+
+  /// Bottom to Top
+  btt,
 }
 
 class Marqueer extends StatefulWidget {
@@ -121,47 +132,6 @@ class Marqueer extends StatefulWidget {
           addAutomaticKeepAlives: itemCount != null,
         );
 
-  // Marqueer.separated({
-  //   required Widget Function(BuildContext context, int index) separatorBuilder,
-  //   required Widget Function(BuildContext context, int index) itemBuilder,
-  //   required int itemCount,
-  //   this.pps = 15.0,
-  //   this.autoStart = true,
-  //   this.direction = MarqueerDirection.rtl,
-  //   this.interaction = true,
-  //   this.restartAfterInteractionDuration = const Duration(seconds: 3),
-  //   this.restartAfterInteraction = true,
-  //   this.onChangeItemInViewPort,
-  //   this.autoStartAfter = Duration.zero,
-  //   this.onInteraction,
-  //   this.controller,
-  //   this.onStarted,
-  //   this.onStopped,
-  //   this.padding = EdgeInsets.zero,
-  //   super.key,
-  // })  : assert((() {
-  //         if (autoStartAfter > Duration.zero) {
-  //           return autoStart;
-  //         }
-
-  //         return true;
-  //       })(),
-  //           "if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`"),
-  //       infinity = false,
-  //       delegate = SliverChildBuilderDelegate(
-  //         (context, index) {
-  //           final itemIndex = index ~/ 2;
-
-  //           if (index.isEven) {
-  //             return itemBuilder(context, itemIndex);
-  //           } else {
-  //             return separatorBuilder(context, itemIndex);
-  //           }
-  //         },
-  //         childCount: max(0, itemCount * 2 - 1),
-  //         semanticIndexCallback: (_, index) => index.isEven ? index ~/ 2 : null,
-  //       );
-
   final SliverChildDelegate delegate;
 
   /// Direction
@@ -207,6 +177,14 @@ class Marqueer extends StatefulWidget {
 class _MarqueerState extends State<Marqueer> {
   final controller = ScrollController();
 
+  final isWebOrDesktop = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
+
+  late var isReverse = widget.direction == MarqueerDirection.ltr ||
+      widget.direction == MarqueerDirection.btt;
+
+  late var isVertical = widget.direction == MarqueerDirection.btt ||
+      widget.direction == MarqueerDirection.ttb;
+
   var step = 0.0;
   var offset = 0.0;
   var animating = false;
@@ -230,7 +208,7 @@ class _MarqueerState extends State<Marqueer> {
     );
   }
 
-  void start({double forStep = 10000.0}) {
+  void start({double forStep = _kDefaultStep}) {
     if (animating || !mounted) {
       return;
     }
@@ -283,7 +261,7 @@ class _MarqueerState extends State<Marqueer> {
     widget.onStopped?.call();
   }
 
-  bool calculateDistance({double forStep = 10000.0}) {
+  bool calculateDistance({double forStep = _kDefaultStep}) {
     final currentPos = controller.offset;
     final maxPos = controller.position.maxScrollExtent;
 
@@ -378,9 +356,6 @@ class _MarqueerState extends State<Marqueer> {
     });
   }
 
-  final isWebOrDesktop = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
-  late var isReverse = widget.direction == MarqueerDirection.ltr;
-
   @override
   void dispose() {
     controller.dispose();
@@ -402,7 +377,7 @@ class _MarqueerState extends State<Marqueer> {
       reverse: isReverse,
       controller: controller,
       padding: widget.padding,
-      scrollDirection: Axis.horizontal,
+      scrollDirection: isVertical ? Axis.vertical : Axis.horizontal,
       semanticChildCount: widget.delegate.estimatedChildCount,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     );

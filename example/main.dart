@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:marqueer/marqueer.dart';
 
 class ExampleScreen extends StatelessWidget {
-  const ExampleScreen({super.key});
+  ExampleScreen({super.key});
+
+  final controller = MarqueerController();
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +16,27 @@ class ExampleScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 0),
         children: [
+          Row(
+            children: [
+              TextButton.icon(
+                onPressed: controller.backward,
+                label: const Text('Backward'),
+                icon: const Icon(Icons.chevron_left),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: controller.forward,
+                label: const Text('Forward'),
+                icon: const Icon(Icons.chevron_right),
+              )
+            ],
+          ),
           const _PostCard(),
           SizedBox(
             height: 100,
             child: Marqueer.builder(
               pps: 60,
-              direction: MarqueerDirection.ltr,
+              controller: controller,
               itemBuilder: (_, index) {
                 return Image.network(
                   'https://picsum.photos/300/300?random=$index',
@@ -30,15 +47,17 @@ class ExampleScreen extends StatelessWidget {
           ),
           const ExchangeBar(),
           SizedBox(
-            height: 150,
+            height: 300,
             child: Marqueer.builder(
               pps: 30,
+              controller: controller,
               direction: MarqueerDirection.ltr,
               autoStartAfter: const Duration(seconds: 2),
-              itemBuilder: (BuildContext context, int index) {
+              itemCount: 10,
+              itemBuilder: (context, index) {
                 return Image.network(
                   'https://picsum.photos/300/300?random=$index',
-                  width: 150,
+                  height: 300,
                 );
               },
             ),
@@ -62,9 +81,15 @@ class _PostCard extends StatelessWidget {
       children: [
         AspectRatio(
           aspectRatio: 1,
-          child: Image.network(
-            'https://picsum.photos/$size/$size?random=$id',
-            fit: BoxFit.cover,
+          child: Marqueer(
+            direction: MarqueerDirection.btt,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Image.network(
+                'https://picsum.photos/$size/$size?random=$id',
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
         Positioned(
@@ -211,21 +236,11 @@ class ExchangeBar extends StatelessWidget {
 
           final item = data[i];
 
-          late Color color;
-
-          switch (item['direction']) {
-            case 1:
-              color = Colors.green;
-              break;
-
-            case -1:
-              color = Colors.red;
-              break;
-
-            default:
-              color = Colors.grey;
-              break;
-          }
+          final color = switch (item['direction']) {
+            1 => Colors.green,
+            -1 => Colors.red,
+            _ => Colors.grey,
+          };
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
