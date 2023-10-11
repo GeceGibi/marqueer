@@ -1,4 +1,24 @@
 
+## 1.4.3
+Added vertical direction support. [#11](https://github.com/GeceGibi/marqueer/issues/11) <br/>
+> note: don't forget child height when using marqueer on vertical.
+
+```dart
+enum MarqueerDirection {
+  /// Right to Left
+  rtl,
+
+  /// Left to Right
+  ltr,
+
+  /// Top to Bottom
+  ttb,
+
+  /// Bottom to Top
+  btt,
+}
+```
+
 ## 1.4.2
 Added mouse swipe support for web [#10](https://github.com/GeceGibi/marqueer/issues/10)
 
