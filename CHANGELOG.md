@@ -1,6 +1,6 @@
 
 ## 1.4.4
-Updated lint version to `3.*`
+Updated lint version to `3.*`\
 Updated preview gif
 
 ## 1.4.3
