@@ -4,6 +4,26 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:marqueer/marqueer.dart';
 
+void main() {
+  runApp(const ExampleApp());
+}
+
+class ExampleApp extends StatelessWidget {
+  const ExampleApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Marqueer Example',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: ExampleScreen(),
+    );
+  }
+}
+
 class ExampleScreen extends StatelessWidget {
   ExampleScreen({super.key});
 
@@ -31,7 +51,7 @@ class ExampleScreen extends StatelessWidget {
               )
             ],
           ),
-          const _PostCard(),
+          _PostCard(controller: controller),
           SizedBox(
             height: 100,
             child: Marqueer.builder(
@@ -69,7 +89,8 @@ class ExampleScreen extends StatelessWidget {
 }
 
 class _PostCard extends StatelessWidget {
-  const _PostCard({super.key});
+  const _PostCard({this.controller, super.key});
+  final MarqueerController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +103,7 @@ class _PostCard extends StatelessWidget {
         AspectRatio(
           aspectRatio: 1,
           child: Marqueer(
+            controller: controller,
             direction: MarqueerDirection.btt,
             child: AspectRatio(
               aspectRatio: 1,

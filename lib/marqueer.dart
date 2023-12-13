@@ -379,7 +379,7 @@ class _MarqueerState extends State<Marqueer> {
       padding: widget.padding,
       scrollDirection: isVertical ? Axis.vertical : Axis.horizontal,
       semanticChildCount: widget.delegate.estimatedChildCount,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
     );
 
     if (isWebOrDesktop) {
@@ -396,6 +396,7 @@ class _MarqueerState extends State<Marqueer> {
     return IgnorePointer(
       ignoring: !interaction,
       child: Listener(
+        behavior: HitTestBehavior.translucent,
         onPointerDown: onPointerDownHandler,
         onPointerUp: onPointerUpHandler,
         child: body,
