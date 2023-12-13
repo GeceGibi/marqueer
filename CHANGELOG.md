@@ -1,4 +1,8 @@
 
+## 1.4.4
+Updated lint version to `3.*`
+Updated preview gif
+
 ## 1.4.3
 Added vertical direction support. [#11](https://github.com/GeceGibi/marqueer/issues/11) <br/>
 > note: don't forget child height when using marqueer on vertical.
