@@ -1,4 +1,9 @@
 
+
+## 1.4.5
+Switched to [very_good_analysis](https://pub.dev/packages/very_good_analysis) for lint
+added minor descriptions to code base
+
 ## 1.4.4
 Updated lint version to `3.*`\
 Updated preview gif

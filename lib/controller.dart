@@ -14,43 +14,49 @@ class MarqueerController {
 
   bool get hasClients => _marquees.isNotEmpty;
 
+  /// Get animate status of Marqueer widget
   bool get isAnimating {
-    assert(hasClients, "Not found any attached marqueer widget");
-    assert(_marquees.length == 1, "Multiple marqueer widget attached.");
+    assert(hasClients, 'Not found any attached marqueer widget');
+    assert(_marquees.length == 1, 'Multiple marqueer widget attached.');
     return _marquees.single.animating;
   }
 
+  /// Start movement for attached Marqueer widget
   void start() {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var state in _marquees) {
+    assert(hasClients, 'Not found any attached marqueer widget');
+    for (final state in _marquees) {
       state.start();
     }
   }
 
+  /// Stop movement for attached Marqueer widget
   void stop() {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var state in _marquees) {
+    assert(hasClients, 'Not found any attached marqueer widget');
+    for (final state in _marquees) {
       state.stop();
     }
   }
 
+  /// Move to forward attached Marqueer widget
   void forward() {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var state in _marquees) {
+    assert(hasClients, 'Not found any attached marqueer widget');
+    for (final state in _marquees) {
       state.forward();
     }
   }
 
+  /// Move to backward attached Marqueer widget
   void backward() {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var state in _marquees) {
+    assert(hasClients, 'Not found any attached marqueer widget');
+    for (final state in _marquees) {
       state.backward();
     }
   }
 
+  /// Change interaction status attached Marqueer widget
   void interactionEnabled(bool enabled) {
-    assert(hasClients, "Not found any attached marqueer widget");
-    for (var state in _marquees) {
+    assert(hasClients, 'Not found any attached marqueer widget');
+    for (final state in _marquees) {
       state.interactionEnabled(enabled);
     }
   }

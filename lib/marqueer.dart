@@ -52,7 +52,7 @@ class Marqueer extends StatefulWidget {
 
           return true;
         })(),
-            "if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`"),
+            'if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`'),
         delegate = SliverChildBuilderDelegate(
           (context, index) {
             onChangeItemInViewPort?.call(index);
@@ -103,7 +103,7 @@ class Marqueer extends StatefulWidget {
 
           return true;
         })(),
-            "if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`"),
+            'if `autoStartAfter` duration bigger than `zero` then `autoStart` must be `true`'),
         infinity = itemCount == null,
         delegate = SliverChildBuilderDelegate(
           (context, index) {
@@ -195,7 +195,8 @@ class _MarqueerState extends State<Marqueer> {
   Timer? timerLoop;
   Timer? timerInteraction;
 
-  /// default delay added for wait scroll anim. end;
+  /// Default delay added (1000ms).
+  /// Because sometimes not matching timer callback and end of scroll animation callback
   Duration get duration => Duration(
         milliseconds: ((step.abs() / widget.pps) * 1000).round(),
       );
@@ -231,8 +232,9 @@ class _MarqueerState extends State<Marqueer> {
     start(forStep: -controller.offset);
   }
 
-  /// Duration calculating after every interaction
-  /// so Timer.periodic is not a good solution
+  ///! Note:
+  ///! Duration calculating after every interaction
+  ///! so Timer.periodic is not a good solution
   void createLoop() {
     final delay = Duration(milliseconds: widget.infinity ? 0 : 50);
 
@@ -288,13 +290,11 @@ class _MarqueerState extends State<Marqueer> {
           final isStart = currentPos == 0;
           step = isStart ? maxPos : maxPos - (maxPos - currentPos);
           offset = isStart ? 0 : -step;
-          break;
 
         case ScrollDirection.reverse:
           final isEnd = maxPos == currentPos;
           step = isEnd ? maxPos : maxPos - currentPos;
           offset = isEnd ? -maxPos : maxPos - step;
-          break;
       }
 
       return step.isFinite;
@@ -339,6 +339,7 @@ class _MarqueerState extends State<Marqueer> {
     super.initState();
     widget.controller?._attach(this);
 
+    /// Wait for the rendering end
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.autoStart) {
         Future.delayed(widget.autoStartAfter, start);
@@ -379,7 +380,6 @@ class _MarqueerState extends State<Marqueer> {
       padding: widget.padding,
       scrollDirection: isVertical ? Axis.vertical : Axis.horizontal,
       semanticChildCount: widget.delegate.estimatedChildCount,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
     );
 
     if (isWebOrDesktop) {
