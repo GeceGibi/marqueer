@@ -50,47 +50,52 @@ final controller = MarqueerController();
 /// controller.interactionEnabled(false)
 
 SizedBox(
-    height: 30,
-    child: Marqueer(
-        pps: 100, /// optional
-        controller: controller, /// optional
-        direction: MarqueerDirection.rtl,  /// optional
-        restartAfterInteractionDuration: const Duration(seconds: 6), /// optional
-        restartAfterInteraction: false, /// optional
-        onChangeItemInViewPort: (index) {
-            print('item index: $index');
-        },
-        onInteraction: () {
-            print('on interaction callback');
-        },
-        onStarted: () {
-            print('on started callback');
-        },
-        onStopped: () {
-            print('on stopped callback');
-        },
-        child: const Text(
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer pretium massa mollis lorem blandit imperdiet. Nulla mattis vitae mauris vel condimentum. Nam posuere, augue vitae lobortis consequat, odio ante condimentum est, at maximus augue purus id metus. Curabitur condimentum aliquet ante at aliquet. Quisque vel massa congue, bibendum leo sodales, malesuada ante. Maecenas sed tortor quis ipsum dictum sollicitudin.',
-        ),
+  height: 30,
+  child: Marqueer(
+    pps: 100,
+    /// optional
+    controller: controller,
+    /// optional
+    direction: MarqueerDirection.rtl,
+    /// optional
+    restartAfterInteractionDuration: const Duration(seconds: 6),
+    /// optional
+    restartAfterInteraction: false,
+    /// optional
+    onChangeItemInViewPort: (index) {
+      print('item index: $index');
+    },
+    onInteraction: () {
+      print('on interaction callback');
+    },
+    onStarted: () {
+      print('on started callback');
+    },
+    onStopped: () {
+      print('on stopped callback');
+    },
+    child: const Text(
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer pretium massa mollis lorem blandit imperdiet. Nulla mattis vitae mauris vel condimentum. Nam posuere, augue vitae lobortis consequat, odio ante condimentum est, at maximus augue purus id metus. Curabitur condimentum aliquet ante at aliquet. Quisque vel massa congue, bibendum leo sodales, malesuada ante. Maecenas sed tortor quis ipsum dictum sollicitudin.',
     ),
+  ),
 );
 ```
 
-Use with builder
+Usage with builder
 
 ```dart
 SizedBox(
-    height: 50,
-    child: Marqueer.builder(
-        itemCount: 200,
-        itemBuilder: (context, index) {
-            return Padding(
-                padding: EdgeInsets.all(4),
-                child: Text('index: $index'),
-            );
-        },
-    ),
-),
+  height: 50,
+  child: Marqueer.builder(
+    itemCount: 200,
+    itemBuilder: (context, index) {
+      return Padding(
+        padding: EdgeInsets.all(4),
+        child: Text('index: $index'),
+      );
+    },
+  ),
+);
 ```
 
 
@@ -98,9 +103,9 @@ Basic usage
 
 ```dart
 SizedBox(
-    height: 50,
-    child: Marqueer(
-        child: AnyWidget()
-    )
-)
+  height: 50,
+  child: Marqueer(
+    child: AnyWidget(),
+  ),
+);
 ```

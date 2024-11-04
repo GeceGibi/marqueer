@@ -34,7 +34,7 @@ class ExampleScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 0),
+        padding: EdgeInsets.zero,
         children: [
           Row(
             children: [
@@ -48,7 +48,7 @@ class ExampleScreen extends StatelessWidget {
                 onPressed: controller.forward,
                 label: const Text('Forward'),
                 icon: const Icon(Icons.chevron_right),
-              )
+              ),
             ],
           ),
           _PostCard(controller: controller),
@@ -81,7 +81,7 @@ class ExampleScreen extends StatelessWidget {
                 );
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -89,7 +89,7 @@ class ExampleScreen extends StatelessWidget {
 }
 
 class _PostCard extends StatelessWidget {
-  const _PostCard({this.controller, super.key});
+  const _PostCard({this.controller});
   final MarqueerController? controller;
 
   @override
@@ -129,7 +129,7 @@ class _PostCard extends StatelessWidget {
                   child: const Padding(
                     padding: EdgeInsets.all(12),
                     child: Text(
-                      "Curabitur nec ex auctor risus scelerisque rhoncus ut porttitor sapien. Pellentesque vestibulum leo a nisi sollicitudin vehicula. Ut fringilla elementum iaculis. Sed risus justo, facilisis at metus sed, interdum euismod lectus. Vivamus tincidunt lorem vel mauris hendrerit, a efficitur felis porttitor. Nulla facilisi.",
+                      'Curabitur nec ex auctor risus scelerisque rhoncus ut porttitor sapien. Pellentesque vestibulum leo a nisi sollicitudin vehicula. Ut fringilla elementum iaculis. Sed risus justo, facilisis at metus sed, interdum euismod lectus. Vivamus tincidunt lorem vel mauris hendrerit, a efficitur felis porttitor. Nulla facilisi.',
                       style: TextStyle(
                         color: Colors.white,
                       ),
@@ -146,98 +146,97 @@ class _PostCard extends StatelessWidget {
 }
 
 class ExchangeBar extends StatelessWidget {
+  const ExchangeBar({super.key});
   static const data = <Map<String, dynamic>>[
     {
-      "id": "xu100_index",
-      "direction": -1,
-      "value": "5.212,38",
-      "change_percent": "%-0.93",
-      "title": "BIST 100",
-      "currency": ""
+      'id': 'xu100_index',
+      'direction': -1,
+      'value': '5.212,38',
+      'change_percent': '%-0.93',
+      'title': 'BIST 100',
+      'currency': '',
     },
     {
-      "id": "usdtry_curncy",
-      "direction": -1,
-      "value": "18,7993",
-      "change_percent": "%-0.32",
-      "title": "Dolar",
-      "currency": "₺"
+      'id': 'usdtry_curncy',
+      'direction': -1,
+      'value': '18,7993',
+      'change_percent': '%-0.32',
+      'title': 'Dolar',
+      'currency': '₺',
     },
     {
-      "id": "eurtry_curncy",
-      "direction": 1,
-      "value": "20,0293",
-      "change_percent": "%0.24",
-      "title": "Euro",
-      "currency": "₺"
+      'id': 'eurtry_curncy',
+      'direction': 1,
+      'value': '20,0293',
+      'change_percent': '%0.24',
+      'title': 'Euro',
+      'currency': '₺',
     },
     {
-      "id": "eurusd_curncy",
-      "direction": 1,
-      "value": "1,0636",
-      "change_percent": "%0.33",
-      "title": "EUR/USD",
-      "currency": "\$"
+      'id': 'eurusd_curncy',
+      'direction': 1,
+      'value': '1,0636',
+      'change_percent': '%0.33',
+      'title': 'EUR/USD',
+      'currency': r'$',
     },
     {
-      "id": "tahvil2y",
-      "direction": -1,
-      "value": "10,49",
-      "change_percent": "%-1.32",
-      "title": "Faiz",
-      "currency": ""
+      'id': 'tahvil2y',
+      'direction': -1,
+      'value': '10,49',
+      'change_percent': '%-1.32',
+      'title': 'Faiz',
+      'currency': '',
     },
     {
-      "id": "xau_curncy",
-      "direction": 1,
-      "value": "1.856,48",
-      "change_percent": "%1.12",
-      "title": "Altın Ons",
-      "currency": "\$"
+      'id': 'xau_curncy',
+      'direction': 1,
+      'value': '1.856,48',
+      'change_percent': '%1.12',
+      'title': 'Altın Ons',
+      'currency': r'$',
     },
     {
-      "id": "co1_comdty",
-      "direction": 1,
-      "value": "85,83",
-      "change_percent": "%1.27",
-      "title": "Brent Petrol",
-      "currency": "\$"
+      'id': 'co1_comdty',
+      'direction': 1,
+      'value': '85,83',
+      'change_percent': '%1.27',
+      'title': 'Brent Petrol',
+      'currency': r'$',
     },
     {
-      "id": "bdiy_index",
-      "direction": 1,
-      "value": "1.211,00",
-      "change_percent": "%5.76",
-      "title": "Baltık Kuru Yük.",
-      "currency": "\$"
+      'id': 'bdiy_index',
+      'direction': 1,
+      'value': '1.211,00',
+      'change_percent': '%5.76',
+      'title': 'Baltık Kuru Yük.',
+      'currency': r'$',
     },
     {
-      "id": "btcusdt",
-      "title": "Bitcoin",
-      "value": "22,430.00",
-      "change_percent": "%0.46",
-      "direction": 1,
-      "currency": "\$"
+      'id': 'btcusdt',
+      'title': 'Bitcoin',
+      'value': '22,430.00',
+      'change_percent': '%0.46',
+      'direction': 1,
+      'currency': r'$',
     },
     {
-      "id": "ethusdt",
-      "title": "Ethereum",
-      "value": "1,570.10",
-      "change_percent": "%0.4",
-      "direction": 1,
-      "currency": "\$"
+      'id': 'ethusdt',
+      'title': 'Ethereum',
+      'value': '1,570.10',
+      'change_percent': '%0.4',
+      'direction': 1,
+      'currency': r'$',
     },
     {
-      "id": "gldgr",
-      "title": "Altın Gram",
-      "value": "1,127.08",
-      "change_percent": "%1.01",
-      "direction": 1,
-      "currency": "₺"
-    }
+      'id': 'gldgr',
+      'title': 'Altın Gram',
+      'value': '1,127.08',
+      'change_percent': '%1.01',
+      'direction': 1,
+      'currency': '₺',
+    },
   ];
-
-  const ExchangeBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +247,7 @@ class ExchangeBar extends StatelessWidget {
           child: Text('      ~     '),
         ),
         itemBuilder: (context, index) {
-          var multiplier = index ~/ data.length;
+          final multiplier = index ~/ data.length;
 
           var i = index;
 

@@ -197,9 +197,9 @@ class _MarqueerState extends State<Marqueer> {
 
   /// Default delay added (1000ms).
   /// Because sometimes not matching timer callback and end of scroll animation callback
-  Duration get duration => Duration(
-        milliseconds: ((step.abs() / widget.pps) * 1000).round(),
-      );
+  Duration get duration {
+    return Duration(milliseconds: ((step.abs() / widget.pps) * 1000).round());
+  }
 
   void animate() {
     controller.animateTo(
@@ -408,9 +408,6 @@ class _MarqueerState extends State<Marqueer> {
 class _WebAndDesktopMouseDragBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices {
-    return {
-      PointerDeviceKind.touch,
-      PointerDeviceKind.mouse,
-    };
+    return {PointerDeviceKind.touch, PointerDeviceKind.mouse};
   }
 }
