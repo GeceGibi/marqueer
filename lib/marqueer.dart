@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -12,6 +13,8 @@ part 'controller.dart';
 
 const _kDefaultStep = 10000.0;
 
+/// Direction types
+/// RightToLeft, LeftToRight, TopToBottom, BottomToTop
 enum MarqueerDirection {
   /// Right to Left
   rtl,
@@ -44,6 +47,8 @@ class Marqueer extends StatefulWidget {
     this.onStarted,
     this.onStopped,
     this.padding = EdgeInsets.zero,
+    this.hitTestBehavior = HitTestBehavior.translucent,
+    this.scrollablePointerIgnoring = false,
     super.key,
   })  : assert((() {
           if (autoStartAfter > Duration.zero) {
@@ -95,6 +100,8 @@ class Marqueer extends StatefulWidget {
     this.onStarted,
     this.onStopped,
     this.padding = EdgeInsets.zero,
+    this.hitTestBehavior = HitTestBehavior.opaque,
+    this.scrollablePointerIgnoring = false,
     super.key,
   })  : assert((() {
           if (autoStartAfter > Duration.zero) {
@@ -161,6 +168,15 @@ class Marqueer extends StatefulWidget {
   /// Auto Start after duration
   final Duration autoStartAfter;
 
+  final HitTestBehavior hitTestBehavior;
+
+  /// Scrollable Widget has default Ignore pointer.
+  /// It's causing some gesture bugs, with this prob Scrollable > IgnorePointer is ignoring. :).
+  /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scrollable.dart#L998
+  /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scrollable.dart#L813
+  /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scroll_context.dart#L60
+  final bool scrollablePointerIgnoring;
+
   ///
   final bool infinity;
 
@@ -175,7 +191,7 @@ class Marqueer extends StatefulWidget {
 }
 
 class _MarqueerState extends State<Marqueer> {
-  final controller = ScrollController();
+  final scrollController = ScrollController();
 
   final isWebOrDesktop = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
 
@@ -202,11 +218,15 @@ class _MarqueerState extends State<Marqueer> {
   }
 
   void animate() {
-    controller.animateTo(
+    scrollController.animateTo(
       offset + step,
       duration: duration,
       curve: Curves.linear,
     );
+
+    if (widget.scrollablePointerIgnoring) {
+      _searchIgnorePointer(context.findRenderObject());
+    }
   }
 
   void start({double forStep = _kDefaultStep}) {
@@ -229,7 +249,7 @@ class _MarqueerState extends State<Marqueer> {
 
   void backward() {
     stop();
-    start(forStep: -controller.offset);
+    start(forStep: -scrollController.offset);
   }
 
   ///! Note:
@@ -257,15 +277,15 @@ class _MarqueerState extends State<Marqueer> {
     timerLoop?.cancel();
     timerInteraction?.cancel();
 
-    controller.jumpTo(controller.offset);
-    offset = controller.offset;
+    scrollController.jumpTo(scrollController.offset);
+    offset = scrollController.offset;
 
     widget.onStopped?.call();
   }
 
   bool calculateDistance({double forStep = _kDefaultStep}) {
-    final currentPos = controller.offset;
-    final maxPos = controller.position.maxScrollExtent;
+    final currentPos = scrollController.offset;
+    final maxPos = scrollController.position.maxScrollExtent;
 
     if (widget.infinity) {
       offset = currentPos;
@@ -305,7 +325,7 @@ class _MarqueerState extends State<Marqueer> {
 
   void interactionEnabled(bool enabled) {
     if (interaction != enabled) {
-      offset = controller.offset;
+      offset = scrollController.offset;
       timerInteraction?.cancel();
 
       setState(() {
@@ -346,8 +366,8 @@ class _MarqueerState extends State<Marqueer> {
       }
 
       if (!widget.infinity) {
-        controller.addListener(() {
-          final direction = controller.position.userScrollDirection;
+        scrollController.addListener(() {
+          final direction = scrollController.position.userScrollDirection;
 
           if (interactionDirection != direction) {
             interactionDirection = direction;
@@ -359,11 +379,25 @@ class _MarqueerState extends State<Marqueer> {
 
   @override
   void dispose() {
-    controller.dispose();
+    scrollController.dispose();
     timerLoop?.cancel();
     timerInteraction?.cancel();
     widget.controller?._detach(this);
     super.dispose();
+  }
+
+  var key = GlobalKey();
+
+  void _searchIgnorePointer(RenderObject? renderObject) {
+    if (renderObject != null) {
+      renderObject.visitChildren((child) {
+        if (child is RenderIgnorePointer) {
+          child.ignoring = false;
+        } else {
+          _searchIgnorePointer(child);
+        }
+      });
+    }
   }
 
   @override
@@ -372,42 +406,58 @@ class _MarqueerState extends State<Marqueer> {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    Widget body = ListView.custom(
-      childrenDelegate: widget.delegate,
+    Widget body = _MarqueerScrollView(
+      key: key,
+      widget.delegate,
       physics: physics,
       reverse: isReverse,
-      controller: controller,
+      controller: scrollController,
       padding: widget.padding,
       scrollDirection: isVertical ? Axis.vertical : Axis.horizontal,
       semanticChildCount: widget.delegate.estimatedChildCount,
+      hitTestBehavior: widget.hitTestBehavior,
     );
 
     if (isWebOrDesktop) {
       body = ScrollConfiguration(
         behavior: _WebAndDesktopMouseDragBehavior(),
-        child: MouseRegion(
-          onEnter: (_) => stop(),
-          onExit: (_) => start(),
-          child: body,
-        ),
+        child: body,
       );
     }
 
-    return IgnorePointer(
-      ignoring: !interaction,
-      child: Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: onPointerDownHandler,
-        onPointerUp: onPointerUpHandler,
-        child: body,
-      ),
+    return Listener(
+      behavior: widget.hitTestBehavior,
+      onPointerDown: onPointerDownHandler,
+      onPointerUp: onPointerUpHandler,
+      child: body,
     );
   }
 }
 
-class _WebAndDesktopMouseDragBehavior extends MaterialScrollBehavior {
+class _WebAndDesktopMouseDragBehavior extends ScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices {
     return {PointerDeviceKind.touch, PointerDeviceKind.mouse};
+  }
+}
+
+class _MarqueerScrollView extends BoxScrollView {
+  const _MarqueerScrollView(
+    this.delegate, {
+    super.controller,
+    super.hitTestBehavior,
+    super.physics,
+    super.reverse,
+    super.padding,
+    super.scrollDirection,
+    super.semanticChildCount,
+    super.key,
+  });
+
+  final SliverChildDelegate delegate;
+
+  @override
+  Widget buildChildLayout(BuildContext context) {
+    return SliverList(delegate: delegate);
   }
 }

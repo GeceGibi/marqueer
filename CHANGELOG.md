@@ -1,3 +1,6 @@
+## 1.5.0
+Added `hitTestBehavior` support \
+Added `scrollablePointerIgnoring` for handle touch at first time, fixed [#15](https://github.com/GeceGibi/marqueer/issues/15) [#13](https://github.com/GeceGibi/marqueer/issues/13)
 
 
 ## 1.4.5

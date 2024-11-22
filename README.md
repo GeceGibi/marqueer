@@ -18,27 +18,28 @@ Transform to "Marquee" from any widget.
 
 
 ## Marquee
-| Argument                        | Type                                              | Description      | Required | Default               |
-| ------------------------------- |-------------------------------------------------  | ---------------- | -------- | --------------------- |
-| child                           | Widget                                            |                  | YES      | -                     |
-| pps                             | double                                            | Pixel Per Second | NO       | 15.0                  |
-| direction                       | enum                                              |                  | NO       | MarqueerDirection.rtl |
-| padding                         | EdgeInsets                                        | ListView Padding | NO       | EdgeInsets.zero       |
-| separatorBuilder                | Widget Function(BuildContext context, int index)  |                  | NO       | null                  |
-| infinity                        | bool                                              |                  | NO       | true                  |    
-| interaction                     | bool                                              |                  | NO       | true                  |
-| autoStart                       | bool                                              |                  | NO       | true                  |
-| autoStartAfter                  | Duration                                          |                  | NO       | Duration.zero         |
-| restartAfterInteraction         | bool                                              |                  | NO       | true                  | 
-| restartAfterInteractionDuration | Duration                                          |                  | NO       | Duration(seconds: 3)  |
-| controller                      | MarqueerController                                |                  | NO       | null                  |
-| onChangeItemInViewPort          | void Function(index int)                          | callback         | NO       | null                  |
-| onInteraction                   | void Function()                                   | callback         | NO       | null                  |
-| onStarted                       | void Function()                                   | callback         | NO       | null                  |
-| onStopped                       | void Function()                                   | callback         | NO       | null                  |
-| itemBuilder                     | Widget Function(BuildContext context, int index)  | callback         | YES      | null                  |
-| itemCount                       | int                                               |                  | NO       | null                  |
-
+| Argument                        | Type                                              | Description      | Required | Default                     |
+| ------------------------------- |-------------------------------------------------  | ---------------- | -------- | --------------------------- |
+| child                           | Widget                                            |                  | YES      | -                           |
+| pps                             | double                                            | Pixel Per Second | NO       | 15.0                        |
+| direction                       | enum                                              |                  | NO       | MarqueerDirection.rtl       |
+| padding                         | EdgeInsets                                        | ListView Padding | NO       | EdgeInsets.zero             |
+| separatorBuilder                | Widget Function(BuildContext context, int index)  |                  | NO       | null                        |
+| infinity                        | bool                                              |                  | NO       | true                        |    
+| interaction                     | bool                                              |                  | NO       | true                        |
+| autoStart                       | bool                                              |                  | NO       | true                        |
+| autoStartAfter                  | Duration                                          |                  | NO       | Duration.zero               |
+| restartAfterInteraction         | bool                                              |                  | NO       | true                        | 
+| restartAfterInteractionDuration | Duration                                          |                  | NO       | Duration(seconds: 3)        |
+| controller                      | MarqueerController                                |                  | NO       | null                        |
+| onChangeItemInViewPort          | void Function(index int)                          | callback         | NO       | null                        |
+| onInteraction                   | void Function()                                   | callback         | NO       | null                        |
+| onStarted                       | void Function()                                   | callback         | NO       | null                        |
+| onStopped                       | void Function()                                   | callback         | NO       | null                        |
+| itemBuilder                     | Widget Function(BuildContext context, int index)  | callback         | YES      | null                        |
+| itemCount                       | int                                               |                  | NO       | null                        |
+| scrollablePointerIgnoring       | bool                                              |                  | NO       | false                       |
+| hitTestBehavior                 | HitTestBehavior                                   |                  | NO       | HitTestBehavior.translucent | 
 
 ```dart
 final controller = MarqueerController();

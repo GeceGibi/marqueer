@@ -56,11 +56,20 @@ class ExampleScreen extends StatelessWidget {
             height: 100,
             child: Marqueer.builder(
               pps: 60,
+              scrollablePointerIgnoring: true,
               controller: controller,
-              itemBuilder: (_, index) {
-                return Image.network(
-                  'https://picsum.photos/300/300?random=$index',
-                  width: 100,
+              itemBuilder: (context, index) {
+                ///
+                ///
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    print('Tap');
+                  },
+                  child: Image.network(
+                    'https://picsum.photos/300/300?random=$index',
+                    width: 100,
+                  ),
                 );
               },
             ),

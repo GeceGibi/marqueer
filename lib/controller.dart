@@ -1,6 +1,8 @@
-part of marqueer;
+part of 'marqueer.dart';
 
+///
 class MarqueerController {
+  ///
   MarqueerController();
 
   final _marquees = <_MarqueerState>[];
@@ -12,6 +14,7 @@ class MarqueerController {
     _marquees.remove(marqueer);
   }
 
+  ///
   bool get hasClients => _marquees.isNotEmpty;
 
   /// Get animate status of Marqueer widget
