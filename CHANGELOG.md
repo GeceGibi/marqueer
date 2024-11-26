@@ -1,3 +1,11 @@
+## 2.0.0
+Refactored code base and cleared.
+
+
+Added `interactionsChangesAnimationDirection`
+Hidden `web` and `desktop` scrollbar
+Removed `MouseRegion` from widget hierarchy
+
 ## 1.5.0
 Added `hitTestBehavior` support \
 Added `scrollablePointerIgnoring` for handle touch at first time, fixed [#15](https://github.com/GeceGibi/marqueer/issues/15) [#13](https://github.com/GeceGibi/marqueer/issues/13)

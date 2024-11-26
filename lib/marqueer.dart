@@ -2,14 +2,13 @@ library marqueer;
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 part 'controller.dart';
+part 'scroll_view.dart';
 
 const _kDefaultStep = 10000.0;
 
@@ -27,6 +26,13 @@ enum MarqueerDirection {
 
   /// Bottom to Top
   btt,
+}
+
+Axis _getAxisForMarqueerDirection(MarqueerDirection direction) {
+  return switch (direction) {
+    MarqueerDirection.rtl || MarqueerDirection.ltr => Axis.horizontal,
+    MarqueerDirection.ttb || MarqueerDirection.btt => Axis.vertical
+  };
 }
 
 class Marqueer extends StatefulWidget {
@@ -49,6 +55,7 @@ class Marqueer extends StatefulWidget {
     this.padding = EdgeInsets.zero,
     this.hitTestBehavior = HitTestBehavior.translucent,
     this.scrollablePointerIgnoring = false,
+    this.interactionsChangesAnimationDirection = true,
     super.key,
   })  : assert((() {
           if (autoStartAfter > Duration.zero) {
@@ -62,22 +69,23 @@ class Marqueer extends StatefulWidget {
           (context, index) {
             onChangeItemInViewPort?.call(index);
 
-            if (separatorBuilder != null) {
-              final children = [child];
-
-              if (direction == MarqueerDirection.rtl) {
-                children.add(separatorBuilder(context, index));
-              } else {
-                children.insert(0, separatorBuilder(context, index));
-              }
-
-              return Flex(
-                direction: Axis.horizontal,
-                children: children,
-              );
+            if (separatorBuilder == null) {
+              return child;
             }
 
-            return child;
+            final children = [child];
+
+            if (direction == MarqueerDirection.rtl) {
+              children.add(separatorBuilder(context, index));
+            } else {
+              children.insert(0, separatorBuilder(context, index));
+            }
+
+            return Flex(
+              direction: _getAxisForMarqueerDirection(direction),
+              mainAxisSize: MainAxisSize.min,
+              children: children,
+            );
           },
           childCount: infinity ? null : 1,
           addAutomaticKeepAlives: !infinity,
@@ -102,6 +110,7 @@ class Marqueer extends StatefulWidget {
     this.padding = EdgeInsets.zero,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.scrollablePointerIgnoring = false,
+    this.interactionsChangesAnimationDirection = true,
     super.key,
   })  : assert((() {
           if (autoStartAfter > Duration.zero) {
@@ -118,22 +127,22 @@ class Marqueer extends StatefulWidget {
 
             final widget = itemBuilder(context, index);
 
-            if (separatorBuilder != null && index + 1 != itemCount) {
-              final children = [widget];
-
-              if (direction == MarqueerDirection.rtl) {
-                children.add(separatorBuilder(context, index));
-              } else {
-                children.insert(0, separatorBuilder(context, index));
-              }
-
-              return Flex(
-                direction: Axis.horizontal,
-                children: children,
-              );
+            if (separatorBuilder == null || index + 1 == itemCount) {
+              return widget;
             }
 
-            return widget;
+            final children = [widget];
+
+            if (direction == MarqueerDirection.rtl) {
+              children.add(separatorBuilder(context, index));
+            } else {
+              children.insert(0, separatorBuilder(context, index));
+            }
+
+            return Flex(
+              direction: _getAxisForMarqueerDirection(direction),
+              children: children,
+            );
           },
           childCount: itemCount,
           addAutomaticKeepAlives: itemCount != null,
@@ -156,6 +165,9 @@ class Marqueer extends StatefulWidget {
   /// Stop when interaction
   final bool restartAfterInteraction;
 
+  ///
+  final bool interactionsChangesAnimationDirection;
+
   /// Restart delay
   final Duration restartAfterInteractionDuration;
 
@@ -168,10 +180,14 @@ class Marqueer extends StatefulWidget {
   /// Auto Start after duration
   final Duration autoStartAfter;
 
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// Defaults to [HitTestBehavior.opaque].
   final HitTestBehavior hitTestBehavior;
 
   /// Scrollable Widget has default Ignore pointer.
   /// It's causing some gesture bugs, with this prob Scrollable > IgnorePointer is ignoring. :).
+  ///
   /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scrollable.dart#L998
   /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scrollable.dart#L813
   /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scroll_context.dart#L60
@@ -193,33 +209,35 @@ class Marqueer extends StatefulWidget {
 class _MarqueerState extends State<Marqueer> {
   final scrollController = ScrollController();
 
-  final isWebOrDesktop = kIsWeb || (!Platform.isAndroid && !Platform.isIOS);
-
-  late var isReverse = widget.direction == MarqueerDirection.ltr ||
-      widget.direction == MarqueerDirection.btt;
-
-  late var isVertical = widget.direction == MarqueerDirection.btt ||
-      widget.direction == MarqueerDirection.ttb;
-
-  var step = 0.0;
-  var offset = 0.0;
   var animating = false;
-  var interactionDirection = ScrollDirection.idle;
 
   late var interaction = widget.interaction;
+  late var direction = widget.direction;
 
+  late var isReverse =
+      direction == MarqueerDirection.ltr || direction == MarqueerDirection.btt;
+
+  late var scrollDirection =
+      isReverse ? ScrollDirection.reverse : ScrollDirection.forward;
+
+  Timer? timerStarter;
   Timer? timerLoop;
   Timer? timerInteraction;
 
-  /// Default delay added (1000ms).
-  /// Because sometimes not matching timer callback and end of scroll animation callback
-  Duration get duration {
-    return Duration(milliseconds: ((step.abs() / widget.pps) * 1000).round());
-  }
+  Duration run() {
+    final position = getNextPosition();
+    var distance = (scrollController.offset - position.abs()).abs();
 
-  void animate() {
+    if (distance <= 0) {
+      distance = position.abs();
+    }
+
+    final duration = Duration(
+      milliseconds: ((distance / widget.pps) * 1000).round(),
+    );
+
     scrollController.animateTo(
-      offset + step,
+      position,
       duration: duration,
       curve: Curves.linear,
     );
@@ -227,131 +245,149 @@ class _MarqueerState extends State<Marqueer> {
     if (widget.scrollablePointerIgnoring) {
       _searchIgnorePointer(context.findRenderObject());
     }
+
+    return duration;
   }
 
-  void start({double forStep = _kDefaultStep}) {
-    if (animating || !mounted) {
-      return;
-    }
-
-    if (calculateDistance(forStep: forStep)) {
-      animating = true;
-      animate();
-      createLoop();
-      widget.onStarted?.call();
-    }
+  void start() {
+    widget.onStarted?.call();
+    createLoop();
   }
 
   void forward() {
+    scrollDirection = ScrollDirection.reverse;
     stop();
     start();
   }
 
   void backward() {
+    scrollDirection = ScrollDirection.forward;
     stop();
-    start(forStep: -scrollController.offset);
+    start();
   }
 
-  ///! Note:
-  ///! Duration calculating after every interaction
-  ///! so Timer.periodic is not a good solution
-  void createLoop() {
-    final delay = Duration(milliseconds: widget.infinity ? 0 : 50);
+  Future<void> createLoop() async {
+    final duration = run();
 
     timerLoop?.cancel();
-    timerLoop = Timer(duration + delay, () {
-      if (calculateDistance()) {
-        createLoop();
-        animate();
+    timerLoop = Timer(duration, createLoop);
+  }
+
+  void stop() {
+    if (!mounted) {
+      return;
+    }
+
+    scrollController.jumpTo(scrollController.offset);
+
+    timerLoop?.cancel();
+    timerStarter?.cancel();
+    timerInteraction?.cancel();
+    widget.onStopped?.call();
+  }
+
+  double getNextPosition() {
+    final ScrollController(:offset, :position) = scrollController;
+    final ScrollPosition(:maxScrollExtent) = position;
+
+    if (offset == 0) {
+      if (!widget.infinity && _kDefaultStep >= maxScrollExtent) {
+        return maxScrollExtent;
+      }
+
+      return _kDefaultStep;
+    }
+
+    switch (scrollDirection) {
+      case ScrollDirection.idle:
+        return _kDefaultStep;
+
+      case ScrollDirection.forward:
+        final next = offset - _kDefaultStep;
+
+        if (next <= 0) {
+          scrollDirection = ScrollDirection.reverse;
+          return 0;
+        }
+
+        return next;
+
+      case ScrollDirection.reverse:
+        final next = offset + _kDefaultStep;
+
+        if (next >= maxScrollExtent) {
+          scrollDirection = ScrollDirection.forward;
+          return maxScrollExtent;
+        }
+
+        return next;
+    }
+  }
+
+  void interactionEnabled(bool enabled) {
+    if (interaction == enabled) {
+      return;
+    }
+
+    timerInteraction?.cancel();
+    interaction = enabled;
+    setState(() {});
+  }
+
+  void onPointerUpHandler(PointerUpEvent event) {
+    if (!widget.restartAfterInteraction || !widget.interaction) {
+      return;
+    }
+
+    /// Wait for scroll animation end
+    timerInteraction = Timer(widget.restartAfterInteractionDuration, start);
+  }
+
+  void onPointerDownHandler(PointerDownEvent event) {
+    widget.onInteraction?.call();
+
+    timerInteraction?.cancel();
+    timerLoop?.cancel();
+  }
+
+  void _searchIgnorePointer(RenderObject? renderObject) {
+    if (renderObject == null) {
+      return;
+    }
+
+    renderObject.visitChildren((child) {
+      if (child is RenderIgnorePointer) {
+        child.ignoring = false;
+      } else {
+        _searchIgnorePointer(child);
       }
     });
   }
 
-  void stop() {
-    if (!animating || !mounted) {
+  void addListener() {
+    if (!widget.interactionsChangesAnimationDirection) {
       return;
     }
 
-    animating = false;
+    scrollController.addListener(() {
+      final ScrollPosition(:userScrollDirection) = scrollController.position;
 
-    timerLoop?.cancel();
-    timerInteraction?.cancel();
-
-    scrollController.jumpTo(scrollController.offset);
-    offset = scrollController.offset;
-
-    widget.onStopped?.call();
-  }
-
-  bool calculateDistance({double forStep = _kDefaultStep}) {
-    final currentPos = scrollController.offset;
-    final maxPos = scrollController.position.maxScrollExtent;
-
-    if (widget.infinity) {
-      offset = currentPos;
-      step = forStep;
-      return true;
-    }
-
-    final random = Random();
-
-    // Has scrollable content
-    if (maxPos > 0 && maxPos.isFinite) {
-      switch (interactionDirection) {
-        case ScrollDirection.idle:
-
-          /// just pick random direction and move on
-          interactionDirection = random.nextBool()
-              ? ScrollDirection.forward
-              : ScrollDirection.reverse;
-          return calculateDistance();
-
-        case ScrollDirection.forward:
-          final isStart = currentPos == 0;
-          step = isStart ? maxPos : maxPos - (maxPos - currentPos);
-          offset = isStart ? 0 : -step;
-
-        case ScrollDirection.reverse:
-          final isEnd = maxPos == currentPos;
-          step = isEnd ? maxPos : maxPos - currentPos;
-          offset = isEnd ? -maxPos : maxPos - step;
+      if (scrollDirection == userScrollDirection ||
+          userScrollDirection == ScrollDirection.idle) {
+        return;
       }
 
-      return step.isFinite;
-    }
-
-    return false;
+      scrollDirection = userScrollDirection;
+    });
   }
 
-  void interactionEnabled(bool enabled) {
-    if (interaction != enabled) {
-      offset = scrollController.offset;
-      timerInteraction?.cancel();
-
-      setState(() {
-        interaction = enabled;
-      });
+  @override
+  void setState(VoidCallback fn) {
+    if (!mounted) {
+      return;
     }
-  }
 
-  void onPointerUpHandler(PointerUpEvent event) {
-    if (widget.restartAfterInteraction) {
-      /// Wait for scroll animation end
-      timerInteraction = Timer(widget.restartAfterInteractionDuration, () {
-        if (calculateDistance()) {
-          start();
-        }
-      });
-    }
-  }
-
-  void onPointerDownHandler(PointerDownEvent event) {
-    animating = false;
-    widget.onInteraction?.call();
-
-    /// Clear prev timer if defined
-    timerInteraction?.cancel();
-    timerLoop?.cancel();
+    super.setState(fn);
   }
 
   @override
@@ -362,102 +398,47 @@ class _MarqueerState extends State<Marqueer> {
     /// Wait for the rendering end
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.autoStart) {
-        Future.delayed(widget.autoStartAfter, start);
+        timerStarter = Timer(widget.autoStartAfter, start);
       }
 
-      if (!widget.infinity) {
-        scrollController.addListener(() {
-          final direction = scrollController.position.userScrollDirection;
-
-          if (interactionDirection != direction) {
-            interactionDirection = direction;
-          }
-        });
-      }
+      addListener();
     });
   }
 
   @override
   void dispose() {
     scrollController.dispose();
+
     timerLoop?.cancel();
+    timerStarter?.cancel();
     timerInteraction?.cancel();
     widget.controller?._detach(this);
     super.dispose();
   }
 
-  var key = GlobalKey();
-
-  void _searchIgnorePointer(RenderObject? renderObject) {
-    if (renderObject != null) {
-      renderObject.visitChildren((child) {
-        if (child is RenderIgnorePointer) {
-          child.ignoring = false;
-        } else {
-          _searchIgnorePointer(child);
-        }
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isVertical = direction == MarqueerDirection.btt ||
+        direction == MarqueerDirection.ttb;
+
     final physics = interaction
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
-
-    Widget body = _MarqueerScrollView(
-      key: key,
-      widget.delegate,
-      physics: physics,
-      reverse: isReverse,
-      controller: scrollController,
-      padding: widget.padding,
-      scrollDirection: isVertical ? Axis.vertical : Axis.horizontal,
-      semanticChildCount: widget.delegate.estimatedChildCount,
-      hitTestBehavior: widget.hitTestBehavior,
-    );
-
-    if (isWebOrDesktop) {
-      body = ScrollConfiguration(
-        behavior: _WebAndDesktopMouseDragBehavior(),
-        child: body,
-      );
-    }
 
     return Listener(
       behavior: widget.hitTestBehavior,
       onPointerDown: onPointerDownHandler,
       onPointerUp: onPointerUpHandler,
-      child: body,
+      child: _MarqueerScrollView(
+        widget.delegate,
+        physics: physics,
+        reverse: isReverse,
+        padding: widget.padding,
+        controller: scrollController,
+        scrollDirection: isVertical ? Axis.vertical : Axis.horizontal,
+        semanticChildCount: widget.delegate.estimatedChildCount,
+        hitTestBehavior: widget.hitTestBehavior,
+      ),
     );
-  }
-}
-
-class _WebAndDesktopMouseDragBehavior extends ScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices {
-    return {PointerDeviceKind.touch, PointerDeviceKind.mouse};
-  }
-}
-
-class _MarqueerScrollView extends BoxScrollView {
-  const _MarqueerScrollView(
-    this.delegate, {
-    super.controller,
-    super.hitTestBehavior,
-    super.physics,
-    super.reverse,
-    super.padding,
-    super.scrollDirection,
-    super.semanticChildCount,
-    super.key,
-  });
-
-  final SliverChildDelegate delegate;
-
-  @override
-  Widget buildChildLayout(BuildContext context) {
-    return SliverList(delegate: delegate);
   }
 }
