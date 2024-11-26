@@ -155,7 +155,7 @@ class Marqueer extends StatefulWidget {
   /// Direction
   final MarqueerDirection direction;
 
-  /// List View Padding
+  /// The amount of space by which to inset the children.
   final EdgeInsets padding;
 
   /// Pixel Per Second
@@ -213,15 +213,13 @@ class Marqueer extends StatefulWidget {
 class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   final scrollController = ScrollController();
 
+  var scrollDirection = ScrollDirection.reverse;
   var animating = false;
 
   late var interaction = widget.interaction;
 
   late var isReverse = widget.direction == MarqueerDirection.ltr ||
       widget.direction == MarqueerDirection.btt;
-
-  late var scrollDirection =
-      isReverse ? ScrollDirection.reverse : ScrollDirection.forward;
 
   Timer? timerStarter;
   Timer? timerLoop;
@@ -455,7 +453,6 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     widget.controller?._attach(this);
     WidgetsBinding.instance.addObserver(this);
 
-    /// Wait for the rendering end
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.autoStart) {
         timerStarter = Timer(widget.autoStartAfter, start);
