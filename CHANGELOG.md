@@ -1,9 +1,9 @@
 ## 2.0.0
-Refactored code base and cleared.
+Refactored and cleared code-base.
 
-
-Added `interactionsChangesAnimationDirection`
-Hidden `web` and `desktop` scrollbar
+Added `edgeDuration` \
+Added `interactionsChangesAnimationDirection` \
+Hidden `web` and `desktop` scrollbar \
 Removed `MouseRegion` from widget hierarchy
 
 ## 1.5.0
