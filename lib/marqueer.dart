@@ -2,6 +2,7 @@ library marqueer;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -177,11 +178,19 @@ class Marqueer extends StatefulWidget {
   final MarqueerController? controller;
 
   /// auto start
+  ///
+  /// Defaults to [false].
   final bool autoStart;
 
-  /// Auto Start after duration
+  /// Auto Start after marqueer created in widget tree.
+  ///
+  /// Defaults to [Duration.zero].
   final Duration autoStartAfter;
 
+  /// Adding delay  for animation restart when reached edges.
+  /// Only working when Marqueer is finite or childCount is declared
+  ///
+  /// Defaults to [Duration.zero].
   final Duration edgeDuration;
 
   /// {@macro flutter.widgets.scrollable.hitTestBehavior}
@@ -216,10 +225,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   var scrollDirection = ScrollDirection.reverse;
   var animating = false;
 
-  late var interaction = widget.interaction;
-
-  late var isReverse = widget.direction == MarqueerDirection.ltr ||
-      widget.direction == MarqueerDirection.btt;
+  late var isInteractionEnabled = widget.interaction;
 
   Timer? timerStarter;
   Timer? timerLoop;
@@ -363,12 +369,12 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   }
 
   void interactionEnabled(bool enabled) {
-    if (interaction == enabled) {
+    if (isInteractionEnabled == enabled) {
       return;
     }
 
     timerInteraction?.cancel();
-    interaction = enabled;
+    isInteractionEnabled = enabled;
     setState(() {});
   }
 
@@ -482,7 +488,10 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     final isVertical = widget.direction == MarqueerDirection.btt ||
         widget.direction == MarqueerDirection.ttb;
 
-    final physics = interaction
+    final isReverse = widget.direction == MarqueerDirection.ltr ||
+        widget.direction == MarqueerDirection.btt;
+
+    final physics = isInteractionEnabled
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
