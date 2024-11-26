@@ -221,7 +221,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       widget.direction == MarqueerDirection.btt;
 
   late var scrollDirection =
-      isReverse ? ScrollDirection.forward : ScrollDirection.reverse;
+      isReverse ? ScrollDirection.reverse : ScrollDirection.forward;
 
   Timer? timerStarter;
   Timer? timerLoop;
@@ -310,6 +310,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     timerLoop?.cancel();
     timerStarter?.cancel();
     timerInteraction?.cancel();
+    timerWidowResize?.cancel();
+
     widget.onStopped?.call();
   }
 
@@ -426,13 +428,6 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     }
   }
 
-  // @override
-  // void didUpdateWidget(covariant Marqueer oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   stop();
-  //   start();
-  // }
-
   @override
   void setState(VoidCallback fn) {
     if (!mounted) {
@@ -446,17 +441,19 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   void didChangeMetrics() {
     super.didChangeMetrics();
 
-    stop();
-    timerWidowResize?.cancel();
-    timerWidowResize = Timer(const Duration(milliseconds: 100), start);
+    if (animating) {
+      stop();
+      timerWidowResize?.cancel();
+      timerWidowResize = Timer(const Duration(milliseconds: 100), start);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
 
     widget.controller?._attach(this);
+    WidgetsBinding.instance.addObserver(this);
 
     /// Wait for the rendering end
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -471,14 +468,15 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   @override
   void dispose() {
     scrollController.dispose();
+    widget.controller?._detach(this);
+
+    WidgetsBinding.instance.removeObserver(this);
 
     timerLoop?.cancel();
     timerStarter?.cancel();
     timerInteraction?.cancel();
     timerWidowResize?.cancel();
 
-    widget.controller?._detach(this);
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
