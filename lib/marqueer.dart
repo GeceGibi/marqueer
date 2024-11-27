@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 part 'controller.dart';
 part 'scroll_view.dart';
@@ -224,7 +225,9 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   var scrollDirection = ScrollDirection.reverse;
   var animating = false;
 
-  late var isInteractionEnabled = widget.interaction;
+  late var interaction = widget.interaction;
+
+  Size? viewSize;
 
   Timer? timerStarter;
   Timer? timerLoop;
@@ -248,11 +251,15 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       milliseconds: ((distance / widget.pps) * 1000).round(),
     );
 
-    scrollController.animateTo(
-      position,
-      duration: duration,
-      curve: Curves.linear,
-    );
+    try {
+      scrollController.animateTo(
+        position,
+        duration: duration,
+        curve: Curves.linear,
+      );
+    } catch (e) {
+      // no-op
+    }
 
     if (widget.scrollablePointerIgnoring) {
       _searchIgnorePointer(context.findRenderObject());
@@ -266,23 +273,15 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     createLoop();
   }
 
-  ScrollDirection changeScrollDirection(ScrollDirection direction) {
-    return switch (direction) {
-      ScrollDirection.idle => ScrollDirection.idle,
-      ScrollDirection.forward => ScrollDirection.reverse,
-      ScrollDirection.reverse => ScrollDirection.forward
-    };
-  }
-
   void forward() {
-    scrollDirection = changeScrollDirection(ScrollDirection.forward);
+    scrollDirection = ScrollDirection.reverse;
 
     stop();
     start();
   }
 
   void backward() {
-    scrollDirection = changeScrollDirection(ScrollDirection.reverse);
+    scrollDirection = ScrollDirection.forward;
 
     stop();
     start();
@@ -368,12 +367,12 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   }
 
   void interactionEnabled(bool enabled) {
-    if (isInteractionEnabled == enabled) {
+    if (interaction == enabled) {
       return;
     }
 
     timerInteraction?.cancel();
-    isInteractionEnabled = enabled;
+    interaction = enabled;
     setState(() {});
   }
 
@@ -444,11 +443,17 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   void didChangeMetrics() {
     super.didChangeMetrics();
 
-    if (animating) {
-      stop();
-      timerWidowResize?.cancel();
-      timerWidowResize = Timer(const Duration(milliseconds: 100), start);
+    final size = MediaQuery.sizeOf(context);
+
+    if (viewSize == size || !animating) {
+      return;
     }
+
+    viewSize = size;
+
+    stop();
+    timerWidowResize?.cancel();
+    timerWidowResize = Timer(const Duration(milliseconds: 100), start);
   }
 
   @override
@@ -459,6 +464,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewSize = MediaQuery.sizeOf(context);
+
       if (widget.autoStart) {
         timerStarter = Timer(widget.autoStartAfter, start);
       }
@@ -490,7 +497,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     final isReverse = widget.direction == MarqueerDirection.ltr ||
         widget.direction == MarqueerDirection.btt;
 
-    final physics = isInteractionEnabled
+    final physics = interaction
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
