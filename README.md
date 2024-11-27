@@ -1,5 +1,3 @@
-### **Introducing Marqueer**
-
 The **Marqueer** package is a versatile Flutter widget designed to create smooth and customizable marquee effects. Whether you're building a news ticker, scrolling advertisements, or any animated content display, Marqueer offers flexibility, performance, and user interaction controls.
 
 With support for infinite scrolling, dynamic item generation, and highly customizable animation behavior, Marqueer ensures an engaging and fluid user experience.
