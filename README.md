@@ -79,15 +79,9 @@ Flutter's `Scrollable` widget applies an `IgnorePointer` by default to prevent u
 - **`false`**: The default `IgnorePointer` behavior remains active.
 - **`true`**: Disables the default `IgnorePointer` behavior, allowing gestures to work as expected.
 
-
 ---
 
-
-
-
 ```dart
-
-
 final controller = MarqueerController();
 
 /// controller.start()
