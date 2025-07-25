@@ -1,6 +1,6 @@
 name: marqueer
 description: A powerful and customizable Flutter widget that transforms any widget into a smooth scrolling marquee with support for multiple directions, user interactions, and programmatic control. Perfect for displaying scrolling text, images, or any content with configurable speed, direction, and interaction behavior.
-version: 2.1.0+1
+version: 2.1.0
 homepage: https://github.com/GeceGibi/marqueer
 
 environment:
