@@ -1,3 +1,11 @@
+## 2.1.0
+Enhanced code documentation with comprehensive inline comments for all public APIs \
+Improved type safety by adding explicit type annotations \
+Fixed potential memory leak in `didChangeMetrics` method \
+Optimized timer management in stop() method \
+Enhanced platform detection logic for better cross-platform support \
+Updated pubspec.yaml description for better package discoverability
+
 ## 2.0.1
 Updated **Readme.md**
 Fixed `didChangeMetrics` bug

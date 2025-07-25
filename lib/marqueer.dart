@@ -6,26 +6,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 part 'controller.dart';
 part 'scroll_view.dart';
 
 const _kDefaultStep = 10000.0;
 
-/// Direction types
+/// Direction types for marquee animation
 /// RightToLeft, LeftToRight, TopToBottom, BottomToTop
 enum MarqueerDirection {
-  /// Right to Left
+  /// Right to Left animation direction
   rtl,
 
-  /// Left to Right
+  /// Left to Right animation direction
   ltr,
 
-  /// Top to Bottom
+  /// Top to Bottom animation direction
   ttb,
 
-  /// Bottom to Top
+  /// Bottom to Top animation direction
   btt,
 }
 
@@ -37,6 +36,28 @@ Axis _getAxisForMarqueerDirection(MarqueerDirection direction) {
 }
 
 class Marqueer extends StatefulWidget {
+  /// Creates a marquee widget with a single child
+  ///
+  /// [child] - The widget to animate
+  /// [separatorBuilder] - Optional builder for separator widgets between items
+  /// [pps] - Pixels per second for animation speed (default: 15.0)
+  /// [infinity] - Whether to loop infinitely (default: true)
+  /// [autoStart] - Whether to start animation automatically (default: true)
+  /// [direction] - Animation direction (default: MarqueerDirection.rtl)
+  /// [interaction] - Whether to allow user interaction (default: true)
+  /// [restartAfterInteractionDuration] - Delay before restarting after interaction (default: 3 seconds)
+  /// [restartAfterInteraction] - Whether to restart after user interaction (default: true)
+  /// [onChangeItemInViewPort] - Callback when item changes in viewport
+  /// [autoStartAfter] - Delay before auto-starting (default: Duration.zero)
+  /// [onInteraction] - Callback when user interacts
+  /// [controller] - Optional controller for programmatic control
+  /// [onStarted] - Callback when animation starts
+  /// [onStopped] - Callback when animation stops
+  /// [padding] - Padding around the marquee (default: EdgeInsets.zero)
+  /// [hitTestBehavior] - Hit test behavior (default: HitTestBehavior.translucent)
+  /// [scrollablePointerIgnoring] - Whether to ignore pointer events on scrollable (default: false)
+  /// [interactionsChangesAnimationDirection] - Whether interactions change animation direction (default: true)
+  /// [edgeDuration] - Duration delay at edges for finite marquees (default: Duration.zero)
   Marqueer({
     required Widget child,
     Widget Function(BuildContext context, int index)? separatorBuilder,
@@ -93,6 +114,28 @@ class Marqueer extends StatefulWidget {
           addAutomaticKeepAlives: !infinity,
         );
 
+  /// Creates a marquee widget with multiple items using a builder
+  ///
+  /// [itemBuilder] - Builder function for creating items
+  /// [separatorBuilder] - Optional builder for separator widgets between items
+  /// [itemCount] - Number of items to display (null for infinite)
+  /// [pps] - Pixels per second for animation speed (default: 15.0)
+  /// [autoStart] - Whether to start animation automatically (default: true)
+  /// [direction] - Animation direction (default: MarqueerDirection.rtl)
+  /// [interaction] - Whether to allow user interaction (default: true)
+  /// [restartAfterInteractionDuration] - Delay before restarting after interaction (default: 3 seconds)
+  /// [restartAfterInteraction] - Whether to restart after user interaction (default: true)
+  /// [onChangeItemInViewPort] - Callback when item changes in viewport
+  /// [autoStartAfter] - Delay before auto-starting (default: Duration.zero)
+  /// [onInteraction] - Callback when user interacts
+  /// [controller] - Optional controller for programmatic control
+  /// [onStarted] - Callback when animation starts
+  /// [onStopped] - Callback when animation stops
+  /// [padding] - Padding around the marquee (default: EdgeInsets.zero)
+  /// [hitTestBehavior] - Hit test behavior (default: HitTestBehavior.opaque)
+  /// [scrollablePointerIgnoring] - Whether to ignore pointer events on scrollable (default: false)
+  /// [interactionsChangesAnimationDirection] - Whether interactions change animation direction (default: true)
+  /// [edgeDuration] - Duration delay at edges for finite marquees (default: Duration.zero)
   Marqueer.builder({
     required Widget Function(BuildContext context, int index) itemBuilder,
     Widget Function(BuildContext context, int index)? separatorBuilder,
@@ -153,66 +196,58 @@ class Marqueer extends StatefulWidget {
 
   final SliverChildDelegate delegate;
 
-  /// Direction
+  /// Animation direction for the marquee
   final MarqueerDirection direction;
 
-  /// The amount of space by which to inset the children.
+  /// Padding around the marquee content
   final EdgeInsets padding;
 
-  /// Pixel Per Second
+  /// Animation speed in pixels per second
   final double pps;
 
-  /// Interactions
+  /// Whether user interaction is enabled
   final bool interaction;
 
-  /// Stop when interaction
+  /// Whether to restart animation after user interaction
   final bool restartAfterInteraction;
 
-  ///
+  /// Whether user interactions change the animation direction
   final bool interactionsChangesAnimationDirection;
 
-  /// Restart delay
+  /// Delay before restarting animation after user interaction
   final Duration restartAfterInteractionDuration;
 
-  /// Controller
+  /// Controller for programmatic control of the marquee
   final MarqueerController? controller;
 
-  /// auto start
-  ///
-  /// Defaults to [false].
+  /// Whether to start animation automatically
   final bool autoStart;
 
-  /// Auto Start after marqueer created in widget tree.
-  ///
-  /// Defaults to [Duration.zero].
+  /// Delay before auto-starting the animation
   final Duration autoStartAfter;
 
-  /// Adding delay  for animation restart when reached edges.
-  /// Only working when Marqueer is finite or childCount is declared
-  ///
-  /// Defaults to [Duration.zero].
+  /// Duration delay at edges for finite marquees
   final Duration edgeDuration;
 
-  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
-  ///
-  /// Defaults to [HitTestBehavior.opaque].
+  /// Hit test behavior for pointer events
   final HitTestBehavior hitTestBehavior;
 
-  /// Scrollable Widget has default Ignore pointer.
-  /// It's causing some gesture bugs, with this prob Scrollable > IgnorePointer is ignoring. :).
-  ///
-  /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scrollable.dart#L998
-  /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scrollable.dart#L813
-  /// - https://github.com/flutter/flutter/blob/stable/packages/flutter/lib/src/widgets/scroll_context.dart#L60
+  /// Whether to ignore pointer events on scrollable widgets
   final bool scrollablePointerIgnoring;
 
-  ///
+  /// Whether the marquee loops infinitely
   final bool infinity;
 
-  /// callbacks
+  /// Callback when animation starts
   final void Function()? onStarted;
+
+  /// Callback when animation stops
   final void Function()? onStopped;
+
+  /// Callback when user interacts with the marquee
   final void Function()? onInteraction;
+
+  /// Callback when item changes in viewport
   final void Function(int index)? onChangeItemInViewPort;
 
   @override
@@ -222,10 +257,10 @@ class Marqueer extends StatefulWidget {
 class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   final scrollController = ScrollController();
 
-  var scrollDirection = ScrollDirection.reverse;
+  ScrollDirection scrollDirection = ScrollDirection.reverse;
   var animating = false;
 
-  late var interaction = widget.interaction;
+  late bool interaction = widget.interaction;
 
   Size? viewSize;
 
@@ -234,6 +269,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   Timer? timerInteraction;
   Timer? timerWidowResize;
 
+  /// Calculates and executes the next animation step
+  /// Returns the duration of the animation or null if no animation is possible
   Duration? run() {
     final position = getNextPosition();
 
@@ -268,11 +305,13 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     return duration;
   }
 
+  /// Starts the marquee animation
   void start() {
     widget.onStarted?.call();
     createLoop();
   }
 
+  /// Starts forward animation (left to right or bottom to top)
   void forward() {
     scrollDirection = ScrollDirection.reverse;
 
@@ -280,6 +319,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     start();
   }
 
+  /// Starts backward animation (right to left or top to bottom)
   void backward() {
     scrollDirection = ScrollDirection.forward;
 
@@ -287,6 +327,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     start();
   }
 
+  /// Creates a continuous animation loop
   void createLoop() {
     final duration = run();
     if (duration == null) {
@@ -302,6 +343,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     );
   }
 
+  /// Stops the marquee animation and cancels all timers
   void stop() {
     if (!mounted) {
       return;
@@ -317,6 +359,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     widget.onStopped?.call();
   }
 
+  /// Calculates the next scroll position based on current direction and bounds
+  /// Returns null if no valid position can be calculated
   double? getNextPosition() {
     final ScrollController(:offset, :position) = scrollController;
     final ScrollPosition(:maxScrollExtent, :viewportDimension) = position;
@@ -366,6 +410,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     }
   }
 
+  /// Enables or disables user interaction with the marquee
   void interactionEnabled(bool enabled) {
     if (interaction == enabled) {
       return;
@@ -376,6 +421,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     setState(() {});
   }
 
+  /// Handles pointer up events and restarts animation if configured
   void onPointerUpHandler(PointerUpEvent event) {
     if (!widget.restartAfterInteraction || !widget.interaction) {
       return;
@@ -385,6 +431,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     timerInteraction = Timer(widget.restartAfterInteractionDuration, start);
   }
 
+  /// Handles pointer down events and stops animation
   void onPointerDownHandler(PointerDownEvent event) {
     widget.onInteraction?.call();
 
@@ -392,6 +439,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     timerLoop?.cancel();
   }
 
+  /// Searches for and disables IgnorePointer widgets in the render tree
+  /// This is used to fix gesture handling issues on scrollable widgets
   void _searchIgnorePointer(RenderObject? renderObject) {
     if (renderObject == null) {
       return;
@@ -406,6 +455,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     });
   }
 
+  /// Listens to scroll events and updates animation state
+  /// Handles user scroll direction changes and animation state tracking
   void scrollListener() {
     final ScrollPosition(
       :userScrollDirection,
@@ -442,6 +493,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
+
+    if (!mounted) return;
 
     final size = MediaQuery.sizeOf(context);
 
