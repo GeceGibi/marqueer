@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:marqueer/marqueer.dart';
@@ -7,6 +7,8 @@ import 'package:marqueer/marqueer.dart';
 void main() {
   runApp(const ExampleApp());
 }
+
+final controller = MarqueerController();
 
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
@@ -16,34 +18,47 @@ class ExampleApp extends StatelessWidget {
     return MaterialApp(
       title: 'Marqueer Example',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: ExampleScreen(),
+      home: const ExampleScreen(),
     );
   }
 }
 
 class ExampleScreen extends StatelessWidget {
-  ExampleScreen({super.key});
-
-  final controller = MarqueerController();
+  const ExampleScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: ListView(
-        padding: EdgeInsets.zero,
+        padding: .zero,
         children: [
           Row(
+            mainAxisAlignment: .spaceBetween,
             children: [
               TextButton.icon(
                 onPressed: controller.backward,
                 label: const Text('Backward'),
                 icon: const Icon(Icons.chevron_left),
               ),
-              const Spacer(),
+
+              TextButton.icon(
+                onPressed: () {
+                  unawaited(
+                    controller.animateTo(
+                      0,
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.easeInOut,
+                    ),
+                  );
+                },
+                label: const Text('Animate To 0'),
+                icon: const Icon(Icons.play_arrow),
+              ),
+
               TextButton.icon(
                 onPressed: controller.forward,
                 label: const Text('Forward'),
@@ -51,7 +66,7 @@ class ExampleScreen extends StatelessWidget {
               ),
             ],
           ),
-          _PostCard(controller: controller),
+          const _PostCard(),
           SizedBox(
             height: 100,
             child: Marqueer.builder(
@@ -62,7 +77,7 @@ class ExampleScreen extends StatelessWidget {
                 ///
                 ///
                 return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
+                  behavior: .opaque,
                   onTap: () {
                     print('Tap');
                   },
@@ -98,8 +113,7 @@ class ExampleScreen extends StatelessWidget {
 }
 
 class _PostCard extends StatelessWidget {
-  const _PostCard({this.controller});
-  final MarqueerController? controller;
+  const _PostCard();
 
   @override
   Widget build(BuildContext context) {
@@ -113,12 +127,12 @@ class _PostCard extends StatelessWidget {
           aspectRatio: 1,
           child: Marqueer(
             controller: controller,
-            direction: MarqueerDirection.btt,
+            direction: .btt,
             child: AspectRatio(
               aspectRatio: 1,
               child: Image.network(
                 'https://picsum.photos/$size/$size?random=$id',
-                fit: BoxFit.cover,
+                fit: .cover,
               ),
             ),
           ),
@@ -130,13 +144,14 @@ class _PostCard extends StatelessWidget {
           right: 0,
           child: ClipRRect(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              filter: .blur(sigmaX: 12, sigmaY: 12),
               child: ColoredBox(
                 color: const Color(0x66000000),
                 child: Marqueer(
+                  controller: controller,
                   autoStartAfter: const Duration(seconds: 3),
                   child: const Padding(
-                    padding: EdgeInsets.all(12),
+                    padding: .all(12),
                     child: Text(
                       'Curabitur nec ex auctor risus scelerisque rhoncus ut porttitor sapien. Pellentesque vestibulum leo a nisi sollicitudin vehicula. Ut fringilla elementum iaculis. Sed risus justo, facilisis at metus sed, interdum euismod lectus. Vivamus tincidunt lorem vel mauris hendrerit, a efficitur felis porttitor. Nulla facilisi.',
                       style: TextStyle(
@@ -252,6 +267,7 @@ class ExchangeBar extends StatelessWidget {
     return SizedBox(
       height: 60,
       child: Marqueer.builder(
+        controller: controller,
         separatorBuilder: (_, index) => const Center(
           child: Text('      ~     '),
         ),
@@ -273,10 +289,10 @@ class ExchangeBar extends StatelessWidget {
           };
 
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const .symmetric(horizontal: 20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: .start,
+              mainAxisAlignment: .center,
               children: [
                 Text(
                   "${item['title']}",
