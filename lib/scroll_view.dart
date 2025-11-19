@@ -1,9 +1,8 @@
 part of 'marqueer.dart';
 
-/// Custom scroll view implementation for marquee widgets
-/// Handles platform-specific behavior and scroll configuration
+/// Custom scroll view for marquee widgets
 class _MarqueerScrollView extends BoxScrollView {
-  /// Creates a new _MarqueerScrollView with the given delegate and configuration
+  /// Creates a new scroll view
   const _MarqueerScrollView(
     this.delegate, {
     super.controller,
@@ -15,11 +14,10 @@ class _MarqueerScrollView extends BoxScrollView {
     super.hitTestBehavior,
   });
 
-  /// The delegate that provides the children for this scroll view
+  /// Delegate that provides children
   final SliverChildDelegate delegate;
 
-  /// Returns true if the current platform is web or desktop
-  /// Used to determine appropriate scroll behavior
+  /// Returns true if platform is web or desktop
   bool get isWebOrDesktop {
     if (kIsWeb) return true;
     if (Platform.isAndroid || Platform.isIOS) return false;
@@ -44,18 +42,15 @@ class _MarqueerScrollView extends BoxScrollView {
   }
 }
 
-/// Custom scroll behavior for web and desktop platforms
-/// Enables mouse drag support and hides scrollbars
+/// Custom scroll behavior for web and desktop
 class _WebAndDesktopMouseDragBehavior extends ScrollBehavior {
+  /// Returns supported drag device types
   @override
   Set<PointerDeviceKind> get dragDevices {
-    return {
-      PointerDeviceKind.touch,
-      PointerDeviceKind.mouse,
-    };
+    return {.touch, .mouse};
   }
 
-  /// Hides scrollbars for a cleaner appearance
+  /// Hides scrollbars
   @override
   Widget buildScrollbar(context, child, details) {
     return child;
