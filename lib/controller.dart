@@ -64,6 +64,26 @@ class MarqueerController {
     }
   }
 
+  /// Animates all attached widgets to the specified position
+  /// Throws if no widgets attached
+  ///
+  /// [position] - Target scroll position
+  /// [duration] - Animation duration (default: 100ms)
+  /// [curve] - Animation curve (default: linear)
+  Future<void> animateTo(
+    double position, {
+    Duration duration = const Duration(milliseconds: 100),
+    Curve curve = Curves.linear,
+  }) async {
+    assert(hasClients, 'Not found any attached marqueer widget');
+
+    await Future.wait(
+      _marquees.map((state) {
+        return state.animateTo(position, duration: duration, curve: curve);
+      }),
+    );
+  }
+
   /// Enables or disables user interaction for all attached widgets
   /// Throws if no widgets attached
   void interactionEnabled(bool enabled) {

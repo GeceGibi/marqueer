@@ -488,6 +488,28 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     }
   }
 
+  /// Animates to the specified position
+  /// Stops current animation, animates to position, then restarts
+  ///
+  /// [position] - Target scroll position
+  /// [duration] - Animation duration (default: 100ms)
+  /// [curve] - Animation curve (default: linear)
+  Future<void> animateTo(
+    double position, {
+    Duration duration = const Duration(milliseconds: 100),
+    Curve curve = Curves.linear,
+  }) async {
+    stop();
+
+    await scrollController.animateTo(
+      position,
+      duration: duration,
+      curve: curve,
+    );
+
+    start();
+  }
+
   void _cancelAllTimers() {
     timerLoop?.cancel();
     timerStarter?.cancel();

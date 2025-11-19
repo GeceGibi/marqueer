@@ -63,8 +63,18 @@ By adjusting the **infinity** parameter, you can control how the marquee behaves
 
 #### **Advanced Control**
 
-- `controller`: An optional `MarqueerController` to programmatically control the marquee (e.g., start, stop, or change direction).
+- `controller`: An optional `MarqueerController` to programmatically control the marquee (e.g., start, stop, change direction, or animate to position).
 - `edgeDuration`: Adds a delay when the marquee reaches the edges, useful in finite scrolling scenarios.
+
+#### **Controller Methods**
+
+- `start()`: Starts the marquee animation
+- `stop()`: Stops the marquee animation
+- `forward()`: Starts forward animation (left to right or bottom to top)
+- `backward()`: Starts backward animation (right to left or top to bottom)
+- `animateTo(position, duration, curve)`: Animates to a specific scroll position
+- `interactionEnabled(enabled)`: Enables or disables user interaction
+- `isAnimating`: Returns the animation status (requires single attached widget)
 
 ### **scrollablePointerIgnoring**
 
@@ -86,6 +96,7 @@ final controller = MarqueerController();
 /// controller.stop()
 /// controller.forward()
 /// controller.backward()
+/// controller.animateTo(position, duration: duration, curve: curve)
 /// controller.interactionEnabled(false)
 
 SizedBox(
@@ -95,7 +106,7 @@ SizedBox(
     /// optional
     controller: controller,
     /// optional
-    direction: MarqueerDirection.rtl,
+    direction: .rtl,
     /// optional
     restartAfterInteractionDuration: const Duration(seconds: 6),
     /// optional
@@ -133,7 +144,7 @@ SizedBox(
       return GestureDetector(
         onTap: () => print('tapped $index'),
         child: Padding(
-          padding: EdgeInsets.all(4),
+          padding: .all(4),
           child: Text('index: $index'),
         ),
       );
