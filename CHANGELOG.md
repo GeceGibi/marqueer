@@ -1,3 +1,9 @@
+## 2.2.0
+Simplified and improved documentation across all classes and methods \
+Added `_cancelAllTimers()` helper method for cleaner timer management \
+Fixed memory leak in scroll listener by properly removing listeners in dispose \
+Improved code consistency and readability
+
 ## 2.1.0
 Enhanced code documentation with comprehensive inline comments for all public APIs \
 Improved type safety by adding explicit type annotations \

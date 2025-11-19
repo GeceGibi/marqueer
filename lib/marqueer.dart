@@ -362,10 +362,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
     scrollController.jumpTo(scrollController.offset);
 
-    timerLoop?.cancel();
-    timerStarter?.cancel();
-    timerInteraction?.cancel();
-    timerWidowResize?.cancel();
+    _cancelAllTimers();
 
     widget.onStopped?.call();
   }
@@ -462,6 +459,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     });
   }
 
+  VoidCallback? _isScrollingNotifierListener;
+
   /// Listens to scroll events and updates animation state
   void scrollListener() {
     final ScrollPosition(
@@ -469,13 +468,15 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       :isScrollingNotifier,
     ) = scrollController.position;
 
-    isScrollingNotifier.addListener(() {
+    _isScrollingNotifierListener ??= () {
       if (animating == isScrollingNotifier.value) {
         return;
       }
 
       animating = isScrollingNotifier.value;
-    });
+    };
+
+    isScrollingNotifier.addListener(_isScrollingNotifierListener!);
 
     if (widget.interactionsChangesAnimationDirection) {
       if (scrollDirection == userScrollDirection ||
@@ -485,6 +486,13 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
       scrollDirection = userScrollDirection;
     }
+  }
+
+  void _cancelAllTimers() {
+    timerLoop?.cancel();
+    timerStarter?.cancel();
+    timerInteraction?.cancel();
+    timerWidowResize?.cancel();
   }
 
   @override
@@ -535,15 +543,19 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    if (_isScrollingNotifierListener != null) {
+      scrollController.position.isScrollingNotifier.removeListener(
+        _isScrollingNotifierListener!,
+      );
+    }
+
     scrollController.dispose();
+
     widget.controller?._detach(this);
 
     WidgetsBinding.instance.removeObserver(this);
 
-    timerLoop?.cancel();
-    timerStarter?.cancel();
-    timerInteraction?.cancel();
-    timerWidowResize?.cancel();
+    _cancelAllTimers();
 
     super.dispose();
   }
