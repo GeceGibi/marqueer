@@ -1,3 +1,7 @@
+## 2.2.1
+Fixed `Cannot get renderObject of inactive element` error by guarding access with `mounted` check \
+Fixed `ScrollController not attached to any scroll views` error during dispose lifecycle
+
 ## 2.2.0
 Simplified and improved documentation across all classes and methods \
 Added `_cancelAllTimers()` helper method for cleaner timer management \

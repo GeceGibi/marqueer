@@ -309,7 +309,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       // no-op
     }
 
-    if (widget.scrollablePointerIgnoring) {
+    if (widget.scrollablePointerIgnoring && mounted) {
       _searchIgnorePointer(context.findRenderObject());
     }
 
@@ -566,9 +566,11 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   @override
   void dispose() {
     if (_isScrollingNotifierListener != null) {
-      scrollController.position.isScrollingNotifier.removeListener(
-        _isScrollingNotifierListener!,
-      );
+      if (scrollController.hasClients) {
+        scrollController.position.isScrollingNotifier.removeListener(
+          _isScrollingNotifierListener!,
+        );
+      }
     }
 
     scrollController.dispose();
