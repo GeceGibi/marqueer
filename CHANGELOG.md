@@ -1,3 +1,10 @@
+## 2.2.2
+Fixed memory leak in scrollListener where listeners were added multiple times \
+Optimized _searchIgnorePointer performance by caching result \
+Added debug logging to animation error catch block \
+Removed unused viewportDimension variable \
+Improved code consistency in constructor parameters
+
 ## 2.2.1
 Fixed `Cannot get renderObject of inactive element` error by guarding access with `mounted` check \
 Fixed `ScrollController not attached to any scroll views` error during dispose lifecycle

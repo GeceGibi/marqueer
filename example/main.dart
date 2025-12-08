@@ -8,8 +8,6 @@ void main() {
   runApp(const ExampleApp());
 }
 
-final controller = MarqueerController();
-
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
@@ -26,8 +24,15 @@ class ExampleApp extends StatelessWidget {
   }
 }
 
-class ExampleScreen extends StatelessWidget {
+class ExampleScreen extends StatefulWidget {
   const ExampleScreen({super.key});
+
+  @override
+  State<ExampleScreen> createState() => _ExampleScreenState();
+}
+
+class _ExampleScreenState extends State<ExampleScreen> {
+  final controller = MarqueerController();
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +71,7 @@ class ExampleScreen extends StatelessWidget {
               ),
             ],
           ),
-          const _PostCard(),
+          _PostCard(controller: controller),
           SizedBox(
             height: 100,
             child: Marqueer.builder(
@@ -89,7 +94,7 @@ class ExampleScreen extends StatelessWidget {
               },
             ),
           ),
-          const ExchangeBar(),
+          ExchangeBar(controller: controller),
           SizedBox(
             height: 300,
             child: Marqueer.builder(
@@ -113,7 +118,9 @@ class ExampleScreen extends StatelessWidget {
 }
 
 class _PostCard extends StatelessWidget {
-  const _PostCard();
+  const _PostCard({required this.controller});
+
+  final MarqueerController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +177,9 @@ class _PostCard extends StatelessWidget {
 }
 
 class ExchangeBar extends StatelessWidget {
-  const ExchangeBar({super.key});
+  const ExchangeBar({required this.controller, super.key});
+
+  final MarqueerController controller;
   static const data = <Map<String, dynamic>>[
     {
       'id': 'xu100_index',

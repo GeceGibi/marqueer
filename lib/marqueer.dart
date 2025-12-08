@@ -272,6 +272,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   late bool interaction = widget.interaction;
 
   Size? viewSize;
+  bool _ignorePointerProcessed = false;
 
   Timer? timerStarter;
   Timer? timerLoop;
@@ -306,11 +307,16 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
         ),
       );
     } catch (e) {
-      // no-op
+      if (kDebugMode) {
+        debugPrint('Marqueer animation error: $e');
+      }
     }
 
-    if (widget.scrollablePointerIgnoring && mounted) {
+    if (widget.scrollablePointerIgnoring && 
+        mounted && 
+        !_ignorePointerProcessed) {
       _searchIgnorePointer(context.findRenderObject());
+      _ignorePointerProcessed = true;
     }
 
     return duration;
@@ -371,7 +377,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   /// Returns null if no valid position
   double? getNextPosition() {
     final ScrollController(:offset, :position) = scrollController;
-    final ScrollPosition(:maxScrollExtent, :viewportDimension) = position;
+    final maxScrollExtent = position.maxScrollExtent;
 
     if (maxScrollExtent == 0) {
       return null;
@@ -460,6 +466,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   }
 
   VoidCallback? _isScrollingNotifierListener;
+  bool _listenerAttached = false;
 
   /// Listens to scroll events and updates animation state
   void scrollListener() {
@@ -468,15 +475,18 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       :isScrollingNotifier,
     ) = scrollController.position;
 
-    _isScrollingNotifierListener ??= () {
-      if (animating == isScrollingNotifier.value) {
-        return;
-      }
+    if (!_listenerAttached) {
+      _isScrollingNotifierListener = () {
+        if (animating == isScrollingNotifier.value) {
+          return;
+        }
 
-      animating = isScrollingNotifier.value;
-    };
+        animating = isScrollingNotifier.value;
+      };
 
-    isScrollingNotifier.addListener(_isScrollingNotifierListener!);
+      isScrollingNotifier.addListener(_isScrollingNotifierListener!);
+      _listenerAttached = true;
+    }
 
     if (widget.interactionsChangesAnimationDirection) {
       if (scrollDirection == userScrollDirection ||
