@@ -1,3 +1,8 @@
+## 2.3.0
+Added `MeasureSize` widget - A helper widget using RenderProxyBox to efficiently measure child widget sizes \
+Improved example with advanced dynamic height pattern using MeasureSize and Stack \
+Enhanced documentation with practical use cases for dynamic sizing
+
 ## 2.2.2
 Fixed memory leak in scrollListener where listeners were added multiple times \
 Optimized _searchIgnorePointer performance by caching result \

@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 
 part 'controller.dart';
 part 'scroll_view.dart';
+part 'measure_size.dart';
 
 const _kDefaultStep = 10000.0;
 

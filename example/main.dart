@@ -180,6 +180,7 @@ class ExchangeBar extends StatelessWidget {
   const ExchangeBar({required this.controller, super.key});
 
   final MarqueerController controller;
+
   static const data = <Map<String, dynamic>>[
     {
       'id': 'xu100_index',
@@ -282,7 +283,6 @@ class ExchangeBar extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           final multiplier = index ~/ data.length;
-
           var i = index;
 
           if (multiplier > 0) {
@@ -305,16 +305,11 @@ class ExchangeBar extends StatelessWidget {
               children: [
                 Text(
                   "${item['title']}",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 Text(
                   "${item['value']} ${item['currency']}",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: color,
-                  ),
+                  style: TextStyle(fontSize: 12, color: color),
                 ),
               ],
             ),
@@ -324,3 +319,66 @@ class ExchangeBar extends StatelessWidget {
     );
   }
 }
+
+/// Advanced example: Dynamic height with MeasureSize
+///
+/// If you need dynamic height based on child size, you can use MeasureSize
+/// with a Stack-based approach:
+///
+/// ```dart
+/// class DynamicHeightExchangeBar extends StatefulWidget {
+///   @override
+///   State<DynamicHeightExchangeBar> createState() =>
+///       _DynamicHeightExchangeBarState();
+/// }
+///
+/// class _DynamicHeightExchangeBarState
+///     extends State<DynamicHeightExchangeBar> {
+///   double? height;
+///
+///   void onMeasureSizeHandler(Size size) {
+///     if (height != size.height) {
+///       setState(() => height = size.height);
+///     }
+///   }
+///
+///   Widget _buildItem(Map<String, dynamic> item) {
+///     // Your item widget here
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+///       child: Column(
+///         crossAxisAlignment: CrossAxisAlignment.start,
+///         mainAxisSize: MainAxisSize.min,
+///         children: [
+///           Text(item['title']),
+///           Text(item['value']),
+///         ],
+///       ),
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Stack(
+///       children: [
+///         // Hidden item for measuring natural size
+///         Opacity(
+///           opacity: 0,
+///           child: MeasureSize(
+///             onChange: onMeasureSizeHandler,
+///             child: _buildItem(data[0]),
+///           ),
+///         ),
+///         // Actual marquee with measured height
+///         if (height != null)
+///           SizedBox(
+///             height: height,
+///             child: Marqueer.builder(
+///               itemBuilder: (context, index) => _buildItem(data[index]),
+///             ),
+///           ),
+///       ],
+///     );
+///   }
+/// }
+/// ```
