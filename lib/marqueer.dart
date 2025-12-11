@@ -352,7 +352,12 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
   /// Creates a continuous animation loop
   void createLoop() {
+    if (!mounted) {
+      return;
+    }
+
     final duration = run();
+    
     if (duration == null) {
       return;
     }
