@@ -1,3 +1,6 @@
+## 2.3.1
+Added `clipBehavior` parameter to `Marqueer` and `Marqueer.builder` constructors for customizable clipping behavior
+
 ## 2.3.0
 Added `MeasureSize` widget - A helper widget using RenderProxyBox to efficiently measure child widget sizes \
 Improved example with advanced dynamic height pattern using MeasureSize and Stack \

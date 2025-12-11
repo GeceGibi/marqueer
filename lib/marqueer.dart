@@ -83,6 +83,7 @@ class Marqueer extends StatefulWidget {
     this.scrollablePointerIgnoring = false,
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
+    this.clipBehavior = .hardEdge,
     super.key,
   }) : assert(
          (() {
@@ -163,6 +164,7 @@ class Marqueer extends StatefulWidget {
     this.scrollablePointerIgnoring = false,
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
+    this.clipBehavior = .hardEdge,
     super.key,
   }) : assert(
          (() {
@@ -257,6 +259,9 @@ class Marqueer extends StatefulWidget {
 
   /// Called when item changes in viewport
   final void Function(int index)? onChangeItemInViewPort;
+
+  /// Clip behavior
+  final Clip clipBehavior;
 
   @override
   State<Marqueer> createState() => _MarqueerState();
@@ -610,6 +615,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       onPointerUp: onPointerUpHandler,
       child: _MarqueerScrollView(
         widget.delegate,
+        clipBehavior: widget.clipBehavior,
         physics: physics,
         reverse: isReverse,
         padding: widget.padding,

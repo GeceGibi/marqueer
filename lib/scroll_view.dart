@@ -12,6 +12,8 @@ class _MarqueerScrollView extends BoxScrollView {
     super.scrollDirection,
     super.semanticChildCount,
     super.hitTestBehavior,
+    super.clipBehavior
+
   });
 
   /// Delegate that provides children
