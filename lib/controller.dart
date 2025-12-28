@@ -92,4 +92,12 @@ class MarqueerController {
       state.interactionEnabled(enabled);
     }
   }
+
+  /// Returns current scroll offset
+  /// Throws if no widgets attached or multiple widgets attached
+  double get offset {
+    assert(hasClients, 'Not found any attached marqueer widget');
+    assert(_marquees.length == 1, 'Multiple marqueer widget attached.');
+    return _marquees.single.scrollController.offset;
+  }
 }

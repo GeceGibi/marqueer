@@ -37,8 +37,8 @@ Axis _getAxisForMarqueerDirection(MarqueerDirection direction) {
   };
 }
 
-/// A widget that animates its children in a continuous scrolling marquee
-/// Supports horizontal and vertical directions with customizable speed and interaction
+/// A widget that animates its children in a continuous scrolling marquee.
+/// Supports horizontal/vertical directions with customizable speed.
 class Marqueer extends StatefulWidget {
   /// Creates a marquee widget with a single child
   ///
@@ -49,7 +49,7 @@ class Marqueer extends StatefulWidget {
   /// [autoStart] - Start automatically (default: true)
   /// [direction] - Animation direction (default: rtl)
   /// [interaction] - Allow user interaction (default: true)
-  /// [restartAfterInteractionDuration] - Delay before restart after interaction (default: 3s)
+  /// [restartAfterInteractionDuration] - Delay before restart (default: 3s)
   /// [restartAfterInteraction] - Restart after interaction (default: true)
   /// [onChangeItemInViewPort] - Callback when item changes in viewport
   /// [autoStartAfter] - Delay before auto-start (default: zero)
@@ -59,9 +59,10 @@ class Marqueer extends StatefulWidget {
   /// [onStopped] - Callback when animation stops
   /// [padding] - Padding around marquee (default: zero)
   /// [hitTestBehavior] - Hit test behavior (default: translucent)
-  /// [scrollablePointerIgnoring] - Ignore pointer events on scrollable (default: false)
-  /// [interactionsChangesAnimationDirection] - Interactions change direction (default: true)
+  /// [scrollablePointerIgnoring] - Ignore pointer on scrollable (default: false)
+  /// [interactionsChangesAnimationDirection] - Interactions change direction
   /// [edgeDuration] - Delay at edges for finite marquees (default: zero)
+  /// [intrinsicCrossAxisSize] - Auto-size cross axis (default: false)
   Marqueer({
     required Widget child,
     Widget Function(BuildContext context, int index)? separatorBuilder,
@@ -84,8 +85,10 @@ class Marqueer extends StatefulWidget {
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
     this.clipBehavior = .hardEdge,
+    this.intrinsicCrossAxisSize = false,
     super.key,
-  }) : assert(
+  }) : measureChild = child,
+       assert(
          (() {
            if (autoStartAfter > .zero) {
              return autoStart;
@@ -130,8 +133,8 @@ class Marqueer extends StatefulWidget {
   /// [autoStart] - Whether to start animation automatically (default: true)
   /// [direction] - Animation direction (default: MarqueerDirection.rtl)
   /// [interaction] - Whether to allow user interaction (default: true)
-  /// [restartAfterInteractionDuration] - Delay before restarting after interaction (default: 3 seconds)
-  /// [restartAfterInteraction] - Whether to restart after user interaction (default: true)
+  /// [restartAfterInteractionDuration] - Delay before restart (default: 3s)
+  /// [restartAfterInteraction] - Restart after interaction (default: true)
   /// [onChangeItemInViewPort] - Callback when item changes in viewport
   /// [autoStartAfter] - Delay before auto-starting (default: Duration.zero)
   /// [onInteraction] - Callback when user interacts
@@ -140,9 +143,10 @@ class Marqueer extends StatefulWidget {
   /// [onStopped] - Callback when animation stops
   /// [padding] - Padding around the marquee (default: EdgeInsets.zero)
   /// [hitTestBehavior] - Hit test behavior (default: HitTestBehavior.opaque)
-  /// [scrollablePointerIgnoring] - Whether to ignore pointer events on scrollable (default: false)
-  /// [interactionsChangesAnimationDirection] - Whether interactions change animation direction (default: true)
-  /// [edgeDuration] - Duration delay at edges for finite marquees (default: Duration.zero)
+  /// [scrollablePointerIgnoring] - Ignore pointer on scrollable (default: false)
+  /// [interactionsChangesAnimationDirection] - Interactions change direction
+  /// [edgeDuration] - Delay at edges for finite marquees (default: zero)
+  /// [intrinsicCrossAxisSize] - Auto-size cross axis (default: false)
   Marqueer.builder({
     required Widget Function(BuildContext context, int index) itemBuilder,
     Widget Function(BuildContext context, int index)? separatorBuilder,
@@ -165,8 +169,10 @@ class Marqueer extends StatefulWidget {
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
     this.clipBehavior = .hardEdge,
+    this.intrinsicCrossAxisSize = false,
     super.key,
-  }) : assert(
+  }) : measureChild = null,
+       assert(
          (() {
            if (autoStartAfter > .zero) {
              return autoStart;
@@ -263,6 +269,12 @@ class Marqueer extends StatefulWidget {
   /// Clip behavior
   final Clip clipBehavior;
 
+  /// Auto-size cross axis based on child
+  final bool intrinsicCrossAxisSize;
+
+  /// Child widget for measurement (only used with intrinsicCrossAxisSize)
+  final Widget? measureChild;
+
   @override
   State<Marqueer> createState() => _MarqueerState();
 }
@@ -285,9 +297,19 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   Timer? timerInteraction;
   Timer? timerWidowResize;
 
+  /// Measured cross-axis size for intrinsicCrossAxisSize feature
+  double? _measuredCrossAxisSize;
+
+  /// Tracks if autoStart has been scheduled
+  bool _autoStartScheduled = false;
+
   /// Calculates and executes the next animation step
   /// Returns animation duration or null if not possible
   Duration? run() {
+    if (!scrollController.hasClients) {
+      return null;
+    }
+
     final position = getNextPosition();
 
     if (position == null) {
@@ -377,7 +399,9 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       return;
     }
 
-    scrollController.jumpTo(scrollController.offset);
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(scrollController.offset);
+    }
 
     _cancelAllTimers();
 
@@ -481,6 +505,10 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
   /// Listens to scroll events and updates animation state
   void scrollListener() {
+    if (!scrollController.hasClients) {
+      return;
+    }
+
     final ScrollPosition(
       :userScrollDirection,
       :isScrollingNotifier,
@@ -576,12 +604,25 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewSize = MediaQuery.sizeOf(context);
 
-      if (widget.autoStart) {
+      // Only schedule autoStart here if not using intrinsicCrossAxisSize
+      if (widget.autoStart && !widget.intrinsicCrossAxisSize) {
+        _autoStartScheduled = true;
         timerStarter = Timer(widget.autoStartAfter, start);
       }
 
       scrollController.addListener(scrollListener);
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant Marqueer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Reset measured size and autoStart flag if child changes
+    if (widget.measureChild != oldWidget.measureChild) {
+      _measuredCrossAxisSize = null;
+      _autoStartScheduled = false;
+    }
   }
 
   @override
@@ -610,11 +651,34 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     final isVertical = widget.direction == .btt || widget.direction == .ttb;
     final isReverse = widget.direction == .ltr || widget.direction == .btt;
 
+    // Measure child if intrinsicCrossAxisSize is enabled
+    if (widget.intrinsicCrossAxisSize && _measuredCrossAxisSize == null) {
+      final child = widget.measureChild;
+
+      if (child == null) {
+        throw FlutterError(
+          'intrinsicCrossAxisSize requires measureChild. '
+          'Use Marqueer() constructor instead of Marqueer.builder() '
+          'or provide a fixed size.',
+        );
+      }
+
+      return MeasureSize(
+        onChange: (size) {
+          final crossAxisSize = isVertical ? size.width : size.height;
+          if (_measuredCrossAxisSize != crossAxisSize) {
+            setState(() => _measuredCrossAxisSize = crossAxisSize);
+          }
+        },
+        child: Opacity(opacity: 0, child: child),
+      );
+    }
+
     final physics = interaction
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
-    return Listener(
+    Widget marquee = Listener(
       behavior: widget.hitTestBehavior,
       onPointerDown: onPointerDownHandler,
       onPointerUp: onPointerUpHandler,
@@ -630,5 +694,26 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
         hitTestBehavior: widget.hitTestBehavior,
       ),
     );
+
+    // Apply measured size if intrinsicCrossAxisSize is enabled
+    if (widget.intrinsicCrossAxisSize && _measuredCrossAxisSize != null) {
+      marquee = SizedBox(
+        height: isVertical ? null : _measuredCrossAxisSize,
+        width: isVertical ? _measuredCrossAxisSize : null,
+        child: marquee,
+      );
+
+      // Schedule autoStart after measurement is complete
+      if (widget.autoStart && !_autoStartScheduled) {
+        _autoStartScheduled = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            timerStarter = Timer(widget.autoStartAfter, start);
+          }
+        });
+      }
+    }
+
+    return marquee;
   }
 }

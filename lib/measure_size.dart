@@ -1,6 +1,6 @@
 part of 'marqueer.dart';
 
-/// A widget that measures the size of its child and reports it through a callback.
+/// A widget that measures child size and reports it through a callback.
 ///
 /// This widget uses [RenderProxyBox] to efficiently measure the child's size
 /// after layout. The [onChange] callback is triggered whenever the child's

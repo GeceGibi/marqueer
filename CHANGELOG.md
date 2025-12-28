@@ -1,3 +1,9 @@
+## 2.4.0
+Added `intrinsicCrossAxisSize` parameter - Auto-sizes cross axis based on child widget, no `SizedBox` wrapper needed \
+Added `offset` getter to `MarqueerController` for reading current scroll position \
+Added `hasClients` guards to `run()`, `stop()`, and `scrollListener()` for safer lifecycle handling \
+Improved autoStart behavior with `intrinsicCrossAxisSize` - animation starts after measurement completes
+
 ## 2.3.1
 Added `clipBehavior` parameter to `Marqueer` and `Marqueer.builder` constructors for customizable clipping behavior
 

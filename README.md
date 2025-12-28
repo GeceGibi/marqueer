@@ -65,6 +65,8 @@ By adjusting the **infinity** parameter, you can control how the marquee behaves
 
 - `controller`: An optional `MarqueerController` to programmatically control the marquee (e.g., start, stop, change direction, or animate to position).
 - `edgeDuration`: Adds a delay when the marquee reaches the edges, useful in finite scrolling scenarios.
+- `clipBehavior`: Controls how the content is clipped. Default is `Clip.hardEdge`.
+- `intrinsicCrossAxisSize`: Auto-sizes the cross axis based on child widget. No need for `SizedBox` wrapper. Default is `false`.
 
 #### **Controller Methods**
 
@@ -163,4 +165,13 @@ SizedBox(
     child: AnyWidget(),
   ),
 );
+```
+
+Auto-size (no SizedBox needed)
+
+```dart
+Marqueer(
+  intrinsicCrossAxisSize: true,
+  child: Text('Auto-sized marquee text'),
+)
 ```
