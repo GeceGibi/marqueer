@@ -14,6 +14,7 @@ With support for infinite scrolling, dynamic item generation, and highly customi
 - **Interactive Control**: Pause and resume scrolling based on user interactions.
 - **Dynamic Content**: Use the `builder` constructor for generating items dynamically.
 - **Responsive**: Automatically adapts to screen size changes and other layout updates.
+- **Stable Animation**: Animation continues smoothly even when parent widget rebuilds via `setState`. Only restarts when `pps`, `direction`, or `infinity` parameters change.
 
 ---
 
@@ -76,6 +77,7 @@ By adjusting the **infinity** parameter, you can control how the marquee behaves
 - `backward()`: Starts backward animation (right to left or top to bottom)
 - `animateTo(position, duration, curve)`: Animates to a specific scroll position
 - `interactionEnabled(enabled)`: Enables or disables user interaction
+- `recalculateIntrinsicSize()`: Recalculates intrinsic size when child content changes
 - `isAnimating`: Returns the animation status (requires single attached widget)
 
 ### **scrollablePointerIgnoring**

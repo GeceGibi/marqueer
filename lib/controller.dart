@@ -100,4 +100,14 @@ class MarqueerController {
     assert(_marquees.length == 1, 'Multiple marqueer widget attached.');
     return _marquees.single.scrollController.offset;
   }
+
+  /// Recalculates intrinsic size for all attached widgets
+  /// Use this when child content changes and intrinsicCrossAxisSize is enabled
+  /// Throws if no widgets attached
+  void recalculateIntrinsicSize() {
+    assert(hasClients, 'Not found any attached marqueer widget');
+    for (final state in _marquees) {
+      state._recalculateIntrinsicSize();
+    }
+  }
 }

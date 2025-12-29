@@ -303,6 +303,19 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   /// Tracks if autoStart has been scheduled
   bool _autoStartScheduled = false;
 
+  /// Cached delegate to prevent recreation on parent rebuild
+  late SliverChildDelegate _cachedDelegate = widget.delegate;
+
+  /// Recalculates intrinsic size by resetting measurement
+  /// Called by controller.recalculateIntrinsicSize()
+  void _recalculateIntrinsicSize() {
+    if (!widget.intrinsicCrossAxisSize) return;
+
+    _measuredCrossAxisSize = null;
+    _cachedDelegate = widget.delegate;
+    setState(() {});
+  }
+
   /// Calculates and executes the next animation step
   /// Returns animation duration or null if not possible
   Duration? run() {
@@ -340,8 +353,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       }
     }
 
-    if (widget.scrollablePointerIgnoring && 
-        mounted && 
+    if (widget.scrollablePointerIgnoring &&
+        mounted &&
         !_ignorePointerProcessed) {
       _searchIgnorePointer(context.findRenderObject());
       _ignorePointerProcessed = true;
@@ -379,7 +392,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     }
 
     final duration = run();
-    
+
     if (duration == null) {
       return;
     }
@@ -618,10 +631,32 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   void didUpdateWidget(covariant Marqueer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Reset measured size and autoStart flag if child changes
-    if (widget.measureChild != oldWidget.measureChild) {
+    // Only update delegate if structural parameters changed
+    // Note: We don't compare measureChild/delegate because widget instances
+    // are always different on rebuild. The delegate's builder will naturally
+    // use the new child when items are rebuilt by the SliverList.
+    final structuralChanged =
+        widget.direction != oldWidget.direction ||
+        widget.infinity != oldWidget.infinity;
+
+    if (structuralChanged) {
+      _cachedDelegate = widget.delegate;
+    }
+
+    // Reset measured size if intrinsicCrossAxisSize setting changed
+    if (widget.intrinsicCrossAxisSize != oldWidget.intrinsicCrossAxisSize) {
       _measuredCrossAxisSize = null;
       _autoStartScheduled = false;
+    }
+
+    // Only restart animation if animation speed changed
+    if (widget.pps != oldWidget.pps && animating) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && animating) {
+          stop();
+          start();
+        }
+      });
     }
   }
 
@@ -683,14 +718,14 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       onPointerDown: onPointerDownHandler,
       onPointerUp: onPointerUpHandler,
       child: _MarqueerScrollView(
-        widget.delegate,
+        _cachedDelegate,
         clipBehavior: widget.clipBehavior,
         physics: physics,
         reverse: isReverse,
         padding: widget.padding,
         controller: scrollController,
         scrollDirection: isVertical ? .vertical : .horizontal,
-        semanticChildCount: widget.delegate.estimatedChildCount,
+        semanticChildCount: _cachedDelegate.estimatedChildCount,
         hitTestBehavior: widget.hitTestBehavior,
       ),
     );

@@ -1,3 +1,9 @@
+## 2.4.1
+Fixed animation interruption when parent widget rebuilds via setState \
+Added delegate caching to prevent unnecessary recreation on parent rebuilds \
+Added `recalculateIntrinsicSize()` to controller for manual size recalculation \
+Animation now only restarts when `pps`, `direction`, or `infinity` parameters change
+
 ## 2.4.0
 Added `intrinsicCrossAxisSize` parameter - Auto-sizes cross axis based on child widget, no `SizedBox` wrapper needed \
 Added `offset` getter to `MarqueerController` for reading current scroll position \
