@@ -303,8 +303,8 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   /// Tracks if autoStart has been scheduled
   bool _autoStartScheduled = false;
 
-  /// Cached delegate to prevent recreation on parent rebuild
-  late SliverChildDelegate _cachedDelegate = widget.delegate;
+  /// Proxy delegate to maintain stability while allowing dynamic updates
+  late final _proxyDelegate = _MarqueerProxyDelegate(this);
 
   /// Recalculates intrinsic size by resetting measurement
   /// Called by controller.recalculateIntrinsicSize()
@@ -312,7 +312,6 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     if (!widget.intrinsicCrossAxisSize) return;
 
     _measuredCrossAxisSize = null;
-    _cachedDelegate = widget.delegate;
     setState(() {});
   }
 
@@ -631,17 +630,6 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   void didUpdateWidget(covariant Marqueer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Update delegate if structural parameters changed OR if intrinsic sizing is disabled.
-    // When intrinsicCrossAxisSize is false, we prioritize reactivity (allowing
-    // child updates like text color changes) over animation stability.
-    final structuralChanged =
-        widget.direction != oldWidget.direction ||
-        widget.infinity != oldWidget.infinity;
-
-    if (structuralChanged || !widget.intrinsicCrossAxisSize) {
-      _cachedDelegate = widget.delegate;
-    }
-
     // Reset measured size if intrinsicCrossAxisSize setting changed
     if (widget.intrinsicCrossAxisSize != oldWidget.intrinsicCrossAxisSize) {
       _measuredCrossAxisSize = null;
@@ -712,32 +700,55 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
         ? const BouncingScrollPhysics()
         : const NeverScrollableScrollPhysics();
 
+    // Build marquee with the proxy delegate
     Widget marquee = Listener(
       behavior: widget.hitTestBehavior,
       onPointerDown: onPointerDownHandler,
       onPointerUp: onPointerUpHandler,
       child: _MarqueerScrollView(
-        _cachedDelegate,
+        _proxyDelegate,
         clipBehavior: widget.clipBehavior,
         physics: physics,
         reverse: isReverse,
         padding: widget.padding,
         controller: scrollController,
         scrollDirection: isVertical ? .vertical : .horizontal,
-        semanticChildCount: _cachedDelegate.estimatedChildCount,
+        semanticChildCount: _proxyDelegate.estimatedChildCount,
         hitTestBehavior: widget.hitTestBehavior,
       ),
     );
 
-    // Apply measured size if intrinsicCrossAxisSize is enabled
-    if (widget.intrinsicCrossAxisSize && _measuredCrossAxisSize != null) {
-      marquee = SizedBox(
-        height: isVertical ? null : _measuredCrossAxisSize,
-        width: isVertical ? _measuredCrossAxisSize : null,
-        child: marquee,
+    // Apply measured size and keep MeasureSize active if needed
+    if (widget.intrinsicCrossAxisSize) {
+      final measureWidget = Offstage(
+        child: MeasureSize(
+          onChange: (size) {
+            final crossAxisSize = isVertical ? size.width : size.height;
+            if (_measuredCrossAxisSize != crossAxisSize) {
+              setState(() => _measuredCrossAxisSize = crossAxisSize);
+            }
+          },
+          child: widget.measureChild ?? const SizedBox(),
+        ),
       );
 
-      // Schedule autoStart after measurement is complete
+      if (_measuredCrossAxisSize == null) {
+        return measureWidget;
+      }
+
+      marquee = Stack(
+        clipBehavior: .none,
+        children: [
+          measureWidget,
+          SizedBox(
+            height: isVertical ? null : _measuredCrossAxisSize,
+            width: isVertical ? _measuredCrossAxisSize : null,
+            child: marquee,
+          ),
+        ],
+      );
+
+      // Schedule autoStart after first measurement is complete
       if (widget.autoStart && !_autoStartScheduled) {
         _autoStartScheduled = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -750,4 +761,27 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
     return marquee;
   }
+}
+
+/// A delegate that proxies calls to the current widget's delegate.
+/// This maintains a stable identity for SliverList while allowing
+/// the actual content to update dynamically when the widget rebuilds.
+class _MarqueerProxyDelegate extends SliverChildDelegate {
+  const _MarqueerProxyDelegate(this.state);
+  final _MarqueerState state;
+
+  @override
+  Widget? build(BuildContext context, int index) {
+    return state.widget.delegate.build(context, index);
+  }
+
+  @override
+  bool shouldRebuild(covariant _MarqueerProxyDelegate oldDelegate) {
+    // Always return true to ensure that when the parent Marqueer rebuilds,
+    // the children are also rebuilt with latest properties (e.g. colors).
+    return true;
+  }
+
+  @override
+  int? get estimatedChildCount => state.widget.delegate.estimatedChildCount;
 }
