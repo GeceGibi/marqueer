@@ -631,15 +631,14 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   void didUpdateWidget(covariant Marqueer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Only update delegate if structural parameters changed
-    // Note: We don't compare measureChild/delegate because widget instances
-    // are always different on rebuild. The delegate's builder will naturally
-    // use the new child when items are rebuilt by the SliverList.
+    // Update delegate if structural parameters changed OR if intrinsic sizing is disabled.
+    // When intrinsicCrossAxisSize is false, we prioritize reactivity (allowing
+    // child updates like text color changes) over animation stability.
     final structuralChanged =
         widget.direction != oldWidget.direction ||
         widget.infinity != oldWidget.infinity;
 
-    if (structuralChanged) {
+    if (structuralChanged || !widget.intrinsicCrossAxisSize) {
       _cachedDelegate = widget.delegate;
     }
 

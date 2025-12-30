@@ -1,3 +1,6 @@
+## 2.4.2
+Fixed content update issue (e.g. text color changes) by disabling delegate caching when `intrinsicCrossAxisSize` is false \
+
 ## 2.4.1
 Fixed animation interruption when parent widget rebuilds via setState \
 Added delegate caching to prevent unnecessary recreation on parent rebuilds \

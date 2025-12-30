@@ -1,6 +1,6 @@
 name: marqueer
 description: A customizable Flutter marquee widget with multi-direction scrolling, user interactions, and programmatic control.
-version: 2.4.1
+version: 2.4.2
 homepage: https://github.com/GeceGibi/marqueer
 repository: https://github.com/GeceGibi/marqueer
 issue_tracker: https://github.com/GeceGibi/marqueer/issues
