@@ -2,6 +2,7 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -666,6 +667,26 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     _cancelAllTimers();
 
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant Marqueer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final needsRestart = oldWidget.pps != widget.pps ||
+        oldWidget.direction != widget.direction ||
+        oldWidget.edgeDuration != widget.edgeDuration ||
+        oldWidget.infinity != widget.infinity;
+
+    if (needsRestart) {
+      // kill any in-flight animation/timers and restart the loop
+      stop();
+      // keep current offset, just cancel the animation cleanly
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(scrollController.offset);
+      }
+      if (widget.autoStart) start();
+    }
   }
 
   @override
