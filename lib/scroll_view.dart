@@ -31,6 +31,8 @@ class _MarqueerScrollView extends BoxScrollView {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return true;
+      default:
+        return false;  
     }
   }
 
