@@ -11,20 +11,20 @@ With support for infinite scrolling, dynamic item generation, and highly customi
 - **Directional Scrolling**: Scroll content in any direction—right-to-left, left-to-right, top-to-bottom, or bottom-to-top.
 - **Infinite or Finite Scrolling**: Display unlimited content or stop after a specific item count.
 - **Customizable Speed**: Control scroll speed with a `pps` (pixels per second) parameter.
+- **Item Pause**: `pauseDuration` holds the marquee each time an item lines up with the start of the scroll, then continues. Use it for a long title that should rest for a moment on every loop.
+- **Finite Edge Rest**: `edgeDuration` rests a finite marquee at the start and at the far end. Infinite marquees ignore it.
 - **Interactive Control**: Pause and resume scrolling based on user interactions.
 - **Dynamic Content**: Use the `builder` constructor for generating items dynamically.
 - **Responsive**: Automatically adapts to screen size changes and other layout updates.
-- **Stable Animation**: Animation continues smoothly even when parent widget rebuilds via `setState`. Only restarts when `pps`, `direction`, or `infinity` parameters change.
+- **Stable Animation**: The loop keeps running when the parent rebuilds with `setState`. It restarts when `pps`, `direction`, or `pauseDuration` changes.
 
 ---
 
-### **Updated Infinity Behavior**
+### **Infinity**
 
-- **infinity**: When `true`, the widget creates an endless loop by either:
-  1. Duplicating the content after the original list ends and continuing seamlessly.
-  2. Reversing the animation direction when the list ends.
-
-By adjusting the **infinity** parameter, you can control how the marquee behaves at its boundaries, ensuring a smooth experience regardless of content length.
+- `infinity: true` repeats the child with no end.
+- `infinity: false` lays the content out once, scrolls to the far end, then returns to the start. `edgeDuration` waits at those two ends.
+- `Marqueer.builder` follows `itemCount`. `null` repeats forever. A number is finite.
 
 ---
 
@@ -40,7 +40,7 @@ By adjusting the **infinity** parameter, you can control how the marquee behaves
 
 - `pps`: Pixels per second, controlling the speed of the scroll animation. For instance, `pps: 15.0` means 15 pixels are scrolled every second.
 
-- `infinity`: A `bool` determining how the scroll behaves after reaching the end of the list. When enabled, it either duplicates the content or reverses the animation.
+- `infinity`: When `true` (the default), the child is repeated without an end. When `false`, the content is laid out once, scrolled to the far end, then brought back to the start. `Marqueer.builder` uses `itemCount` for this: `null` repeats forever, a number is finite.
 
 - `autoStart`: A `bool` controlling whether the marquee starts automatically when the widget is built.
 
@@ -60,12 +60,13 @@ By adjusting the **infinity** parameter, you can control how the marquee behaves
 - `onStarted`: Triggered when the animation starts.
 - `onStopped`: Triggered when the animation stops.
 - `onInteraction`: Called when a user interacts with the marquee.
-- `onChangeItemInViewPort`: Invoked when a new item enters the viewport.
+- `onChangeItemInViewPort`: Called with the child index while that child is built. This is not a viewport-enter event.
 
 #### **Advanced Control**
 
 - `controller`: An optional `MarqueerController` to programmatically control the marquee (e.g., start, stop, change direction, or animate to position).
-- `edgeDuration`: Adds a delay when the marquee reaches the edges, useful in finite scrolling scenarios.
+- `edgeDuration`: How long a finite marquee rests after it arrives at the start or the far end. It is ignored while `infinity` is true. `Duration.zero` does not wait.
+- `pauseDuration`: How long to rest each time an item's leading edge lines up with the side the marquee is moving toward. `Duration.zero` never holds. A long title uses about `Duration(seconds: 1)`: the text scrolls, rests when the next copy is back at the start, then continues. Use `separatorBuilder` for the gap between copies.
 - `clipBehavior`: Controls how the content is clipped. Default is `Clip.hardEdge`.
 - `intrinsicCrossAxisSize`: Auto-sizes the cross axis based on child widget. No need for `SizedBox` wrapper. Default is `false`.
 
@@ -73,8 +74,8 @@ By adjusting the **infinity** parameter, you can control how the marquee behaves
 
 - `start()`: Starts the marquee animation
 - `stop()`: Stops the marquee animation
-- `forward()`: Starts forward animation (left to right or bottom to top)
-- `backward()`: Starts backward animation (right to left or top to bottom)
+- `forward()`: Runs the loop toward the increasing scroll offset. On the default right-to-left marquee, content moves left.
+- `backward()`: Runs the loop toward the decreasing scroll offset. On the default right-to-left marquee, content moves right.
 - `animateTo(position, duration, curve)`: Animates to a specific scroll position
 - `interactionEnabled(enabled)`: Enables or disables user interaction
 - `recalculateIntrinsicSize()`: Recalculates intrinsic size when child content changes
@@ -175,5 +176,32 @@ Auto-size (no SizedBox needed)
 Marqueer(
   intrinsicCrossAxisSize: true,
   child: Text('Auto-sized marquee text'),
+)
+```
+
+Long title that rests on every loop
+
+```dart
+SizedBox(
+  height: 48,
+  child: Marqueer(
+    pps: 40,
+    pauseDuration: const Duration(seconds: 1),
+    separatorBuilder: (_, _) => const SizedBox(width: 48),
+    child: const Text('Long song title pauses when it comes back'),
+  ),
+)
+```
+
+Finite marquee that rests at both ends
+
+```dart
+SizedBox(
+  height: 48,
+  child: Marqueer(
+    infinity: false,
+    edgeDuration: const Duration(seconds: 1),
+    child: const Text('Scrolls to the end, rests, then returns to the start'),
+  ),
 )
 ```

@@ -71,6 +71,17 @@ class _ExampleScreenState extends State<ExampleScreen> {
               ),
             ],
           ),
+          SizedBox(
+            height: 48,
+            child: Marqueer(
+              pps: 40,
+              pauseDuration: const Duration(seconds: 1),
+              separatorBuilder: (_, _) => const SizedBox(width: 64),
+              child: const Text(
+                'Long song title pauses when it comes back',
+              ),
+            ),
+          ),
           _PostCard(controller: controller),
           SizedBox(
             height: 100,

@@ -1,3 +1,7 @@
+## 2.6.0
+Added `pauseDuration`. When an item's leading edge reaches the start of the scroll, the marquee holds for that duration and then continues. `Duration.zero` keeps the previous continuous scroll. A long title scrolls, rests for about a second once the next copy lines up, and repeats. \
+`edgeDuration` now waits only after a finite marquee arrives at the start or the end. Infinite marquees ignore it.
+
 ## 2.5.0
 Fixed `scrollablePointerIgnoring` not working after the first animation loop on recent Flutter versions \
 Replaced one-shot `_searchIgnorePointer` call with a cached `RenderIgnorePointer` reference that is re-applied on every new scroll activity via `isScrollingNotifier` \

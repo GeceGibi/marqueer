@@ -20,16 +20,18 @@ class MarqueerController {
   /// Returns true if any marquee widgets are attached
   bool get hasClients => _marquees.isNotEmpty;
 
-  /// Returns animation status
-  /// Throws if no widgets attached or multiple widgets attached
+  /// Whether the single attached marquee is currently scrolling.
+  ///
+  /// Throws if none are attached, or if more than one is attached.
   bool get isAnimating {
     assert(hasClients, 'Not found any attached marqueer widget');
     assert(_marquees.length == 1, 'Multiple marqueer widget attached.');
     return _marquees.single.animating;
   }
 
-  /// Starts animation for all attached widgets
-  /// Throws if no widgets attached
+  /// Starts the loop on every attached marquee.
+  ///
+  /// Throws if none are attached.
   void start() {
     assert(hasClients, 'Not found any attached marqueer widget');
     for (final state in _marquees) {
@@ -37,8 +39,9 @@ class MarqueerController {
     }
   }
 
-  /// Stops animation for all attached widgets
-  /// Throws if no widgets attached
+  /// Stops the loop on every attached marquee and keeps the current offset.
+  ///
+  /// Throws if none are attached.
   void stop() {
     assert(hasClients, 'Not found any attached marqueer widget');
     for (final state in _marquees) {
@@ -46,8 +49,10 @@ class MarqueerController {
     }
   }
 
-  /// Starts forward animation for all attached widgets
-  /// Throws if no widgets attached
+  /// Runs the loop toward the increasing scroll offset.
+  ///
+  /// For the default right-to-left marquee, content moves left.
+  /// Throws if none are attached.
   void forward() {
     assert(hasClients, 'Not found any attached marqueer widget');
     for (final state in _marquees) {
@@ -55,8 +60,10 @@ class MarqueerController {
     }
   }
 
-  /// Starts backward animation for all attached widgets
-  /// Throws if no widgets attached
+  /// Runs the loop toward the decreasing scroll offset.
+  ///
+  /// For the default right-to-left marquee, content moves right.
+  /// Throws if none are attached.
   void backward() {
     assert(hasClients, 'Not found any attached marqueer widget');
     for (final state in _marquees) {
@@ -93,8 +100,9 @@ class MarqueerController {
     }
   }
 
-  /// Returns current scroll offset
-  /// Throws if no widgets attached or multiple widgets attached
+  /// Current scroll offset of the single attached marquee.
+  ///
+  /// Throws if none are attached, or if more than one is attached.
   double get offset {
     assert(hasClients, 'Not found any attached marqueer widget');
     assert(_marquees.length == 1, 'Multiple marqueer widget attached.');

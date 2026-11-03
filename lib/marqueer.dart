@@ -60,7 +60,10 @@ class Marqueer extends StatefulWidget {
   /// [hitTestBehavior] - Hit test behavior (default: translucent)
   /// [scrollablePointerIgnoring] - Ignore pointer on scrollable (default: false)
   /// [interactionsChangesAnimationDirection] - Interactions change direction
-  /// [edgeDuration] - Delay at edges for finite marquees (default: zero)
+  /// [edgeDuration] - Finite only. Rest at the start and the far end
+  /// (default: zero)
+  /// [pauseDuration] - Rest each time an item lines up with the start
+  /// edge (default: zero)
   /// [intrinsicCrossAxisSize] - Auto-size cross axis (default: false)
   Marqueer({
     required Widget child,
@@ -83,6 +86,7 @@ class Marqueer extends StatefulWidget {
     this.scrollablePointerIgnoring = false,
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
+    this.pauseDuration = .zero,
     this.clipBehavior = .hardEdge,
     this.intrinsicCrossAxisSize = false,
     super.key,
@@ -144,7 +148,10 @@ class Marqueer extends StatefulWidget {
   /// [hitTestBehavior] - Hit test behavior (default: HitTestBehavior.opaque)
   /// [scrollablePointerIgnoring] - Ignore pointer on scrollable (default: false)
   /// [interactionsChangesAnimationDirection] - Interactions change direction
-  /// [edgeDuration] - Delay at edges for finite marquees (default: zero)
+  /// [edgeDuration] - Finite only. Rest at the start and the far end
+  /// (default: zero)
+  /// [pauseDuration] - Rest each time an item lines up with the start
+  /// edge (default: zero)
   /// [intrinsicCrossAxisSize] - Auto-size cross axis (default: false)
   Marqueer.builder({
     required Widget Function(BuildContext context, int index) itemBuilder,
@@ -167,6 +174,7 @@ class Marqueer extends StatefulWidget {
     this.scrollablePointerIgnoring = false,
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
+    this.pauseDuration = .zero,
     this.clipBehavior = .hardEdge,
     this.intrinsicCrossAxisSize = false,
     super.key,
@@ -209,69 +217,131 @@ class Marqueer extends StatefulWidget {
          addAutomaticKeepAlives: itemCount != null,
        );
 
+  /// Children laid out along the scroll axis.
+  ///
+  /// The default constructor repeats its child. [Marqueer.builder] uses
+  /// `itemBuilder`.
   final SliverChildDelegate delegate;
 
-  /// Animation direction
+  /// Scroll direction.
+  ///
+  /// [MarqueerDirection.rtl] moves content left, [MarqueerDirection.ltr]
+  /// moves it right, [MarqueerDirection.ttb] moves it down, and
+  /// [MarqueerDirection.btt] moves it up.
   final MarqueerDirection direction;
 
-  /// Padding around content
+  /// Empty space around the scrolling content.
   final EdgeInsets padding;
 
-  /// Animation speed in pixels per second
+  /// Scroll speed in pixels per second.
+  ///
+  /// `15` moves 15 pixels each second. Higher values scroll faster.
   final double pps;
 
-  /// Enable user interaction
+  /// Whether the user can drag the marquee.
+  ///
+  /// A pointer down cancels the running loop. When
+  /// [restartAfterInteraction] is true, the loop starts again after
+  /// [restartAfterInteractionDuration].
   final bool interaction;
 
-  /// Restart after user interaction
+  /// Whether a completed drag starts the loop again.
+  ///
+  /// Has no effect when [interaction] is false.
   final bool restartAfterInteraction;
 
-  /// Interactions change animation direction
+  /// Whether a drag replaces the animation direction.
+  ///
+  /// After the user scrolls the other way, the loop continues that way.
+  /// When false, the marquee keeps the original [direction].
   final bool interactionsChangesAnimationDirection;
 
-  /// Delay before restart after interaction
+  /// How long to wait after a drag before the loop starts again.
+  ///
+  /// Used with [restartAfterInteraction]. The default is 3 seconds.
   final Duration restartAfterInteractionDuration;
 
-  /// Controller for programmatic control
+  /// Optional handle for start, stop, direction, and position changes.
+  ///
+  /// One controller may attach to several marquees. [MarqueerController.offset]
+  /// and [MarqueerController.isAnimating] require exactly one.
   final MarqueerController? controller;
 
-  /// Start animation automatically
+  /// Whether the loop starts on its own after the first frame.
+  ///
+  /// Set this to false when a [MarqueerController] will call `start`.
   final bool autoStart;
 
-  /// Delay before auto-start
+  /// How long to wait after the first frame before [autoStart].
+  ///
+  /// [Duration.zero] starts on the next frame. A longer delay requires
+  /// [autoStart] to be true.
   final Duration autoStartAfter;
 
-  /// Delay at edges for finite marquees
+  /// How long a finite marquee rests at the start and at the far end.
+  ///
+  /// Used only when [infinity] is false. The wait begins after the scroll
+  /// arrives at offset 0 or at the last pixel, then the loop continues.
+  /// [Duration.zero] does not wait. Infinite marquees ignore this value.
   final Duration edgeDuration;
 
-  /// Hit test behavior
+  /// How long to rest each time an item lines up with the start edge.
+  ///
+  /// The scroll moves until the next item's leading edge reaches the side
+  /// it is moving toward, holds, then continues. A long title uses about
+  /// one second: the text scrolls, rests when the repeated title is back
+  /// at the start, and repeats. Put the gap between copies in
+  /// `separatorBuilder`. [Duration.zero] never holds.
+  final Duration pauseDuration;
+
+  /// How this marquee participates in hit testing.
   final HitTestBehavior hitTestBehavior;
 
-  /// Ignore pointer events on scrollable
+  /// Whether taps on children keep working while the loop is animating.
+  ///
+  /// Flutter ignores pointers on a scroll view during an animation. Set
+  /// this to true so a child's tap still fires while the marquee moves.
   final bool scrollablePointerIgnoring;
 
-  /// Loop infinitely
+  /// Whether the child is repeated without an end.
+  ///
+  /// True keeps building copies. False lays the content out once, scrolls
+  /// to the far end, then back to the start. [edgeDuration] applies only
+  /// to that finite trip. [Marqueer.builder] sets this from `itemCount`:
+  /// null repeats forever, a number stops after that many items.
   final bool infinity;
 
-  /// Called when animation starts
+  /// Called each time the loop starts, including a restart after a drag.
   final void Function()? onStarted;
 
-  /// Called when animation stops
+  /// Called when the loop is stopped.
   final void Function()? onStopped;
 
-  /// Called on user interaction
+  /// Called on pointer down while [interaction] is enabled.
   final void Function()? onInteraction;
 
-  /// Called when item changes in viewport
+  /// Called with a child index while that child is built.
+  ///
+  /// This runs from the item builder. It does not mean the item has
+  /// crossed into the viewport.
   final void Function(int index)? onChangeItemInViewPort;
 
-  /// Clip behavior
+  /// How content outside the marquee box is clipped.
+  ///
+  /// The default is [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// Auto-size cross axis based on child
+  /// Sizes the cross axis from the child.
+  ///
+  /// A horizontal marquee takes the child's height, a vertical one its
+  /// width, so an outer [SizedBox] is unnecessary. Only the default
+  /// constructor can measure a child. [Marqueer.builder] cannot.
   final bool intrinsicCrossAxisSize;
 
-  /// Child widget for measurement (only used with intrinsicCrossAxisSize)
+  /// Child measured when [intrinsicCrossAxisSize] is true.
+  ///
+  /// The default constructor sets this to its child. [Marqueer.builder]
+  /// leaves it null.
   final Widget? measureChild;
 
   @override
@@ -305,6 +375,12 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
   /// Tracks if autoStart has been scheduled
   bool _autoStartScheduled = false;
+
+  /// True when the step about to run ends on an item boundary.
+  bool _pauseOnArrival = false;
+
+  /// True when the step about to run ends at 0 or the far end.
+  bool _pauseOnEdge = false;
 
   /// Proxy delegate to maintain stability while allowing dynamic updates
   _MarqueerProxyDelegate get _proxyDelegate => _MarqueerProxyDelegate(this);
@@ -401,10 +477,12 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     }
 
     const gap = Duration(milliseconds: 50);
+    final edge = _pauseOnEdge ? widget.edgeDuration : Duration.zero;
+    final pause = _pauseOnArrival ? widget.pauseDuration : Duration.zero;
 
     timerLoop?.cancel();
     timerLoop = Timer(
-      duration + gap + widget.edgeDuration,
+      duration + gap + edge + pause,
       createLoop,
     );
   }
@@ -424,54 +502,192 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     widget.onStopped?.call();
   }
 
-  /// Calculates the next scroll position
-  /// Returns null if no valid position
+  /// Calculates the next scroll position.
+  ///
+  /// Returns null when there is no valid position. A non-zero
+  /// [Marqueer.pauseDuration] stops the step on the next item.
   double? getNextPosition() {
     final ScrollController(:offset, :position) = scrollController;
     final maxScrollExtent = position.maxScrollExtent;
 
     if (maxScrollExtent == 0) {
+      _pauseOnArrival = false;
+      _pauseOnEdge = false;
       return null;
     }
 
     if (offset == 0) {
       if (!widget.infinity && _kDefaultStep >= maxScrollExtent) {
-        return maxScrollExtent;
+        return _markEdge(offset, _limitToItemBoundary(offset, maxScrollExtent));
       }
 
-      return _kDefaultStep;
-    }
-    ///
-    else if (offset >= maxScrollExtent) {
+      return _markEdge(offset, _limitToItemBoundary(offset, _kDefaultStep));
+    } else if (offset >= maxScrollExtent) {
+      _pauseOnArrival = false;
+
       if (!widget.infinity && _kDefaultStep >= maxScrollExtent) {
-        return 0;
+        return _markEdge(offset, 0);
       }
 
-      return _kDefaultStep;
+      return _markEdge(offset, _kDefaultStep);
     }
 
     switch (scrollDirection) {
       case .idle:
-        return _kDefaultStep;
+        return _markEdge(offset, _limitToItemBoundary(offset, _kDefaultStep));
 
       case .forward:
         final next = offset - _kDefaultStep;
 
         if (next <= 0) {
-          return 0;
+          return _markEdge(offset, _limitToItemBoundary(offset, 0));
         }
 
-        return next;
+        return _markEdge(offset, _limitToItemBoundary(offset, next));
 
       case .reverse:
         final next = offset + _kDefaultStep;
 
         if (next >= maxScrollExtent) {
-          return maxScrollExtent;
+          return _markEdge(
+            offset,
+            _limitToItemBoundary(offset, maxScrollExtent),
+          );
         }
 
-        return next;
+        return _markEdge(offset, _limitToItemBoundary(offset, next));
     }
+  }
+
+  /// Records whether [target] is the start or the far end of a finite marquee.
+  double _markEdge(double offset, double target) {
+    final maxScrollExtent = scrollController.position.maxScrollExtent;
+
+    _pauseOnEdge =
+        !widget.infinity &&
+        target != offset &&
+        (target <= 0 || target >= maxScrollExtent);
+
+    return target;
+  }
+
+  /// Stops [target] on the next item when [Marqueer.pauseDuration] is set.
+  ///
+  /// Item pitch comes from the sliver child already laid out (child plus
+  /// separator). The 10000px step stays in place when the pause is disabled.
+  double _limitToItemBoundary(double offset, double target) {
+    if (widget.pauseDuration == Duration.zero) {
+      _pauseOnArrival = false;
+      return target;
+    }
+
+    final increasing = target > offset;
+    final boundary = _nextItemBoundary(offset, increasing: increasing);
+
+    if (boundary == null) {
+      _pauseOnArrival = false;
+      return target;
+    }
+
+    final hitsBoundary = increasing
+        ? boundary > offset && boundary <= target
+        : boundary < offset && boundary >= target;
+
+    if (!hitsBoundary) {
+      _pauseOnArrival = false;
+      return target;
+    }
+
+    _pauseOnArrival = true;
+    return boundary;
+  }
+
+  /// Nearest item edge in front of [offset], in scroll coordinates.
+  double? _nextItemBoundary(double offset, {required bool increasing}) {
+    final sliver = _findItemSliver();
+
+    if (sliver == null) {
+      return null;
+    }
+
+    final origin = sliver.constraints.precedingScrollExtent;
+    const epsilon = 0.5;
+    double? nearest;
+
+    sliver.visitChildren((child) {
+      if (child is! RenderBox || !child.hasSize) {
+        return;
+      }
+
+      final layout = sliver.childScrollOffset(child);
+
+      if (layout == null) {
+        return;
+      }
+
+      final extent = switch (sliver.constraints.axis) {
+        Axis.horizontal => child.size.width,
+        Axis.vertical => child.size.height,
+      };
+
+      if (extent <= 0) {
+        return;
+      }
+
+      final start = origin + layout;
+      final end = start + extent;
+
+      final candidate = increasing
+          ? (offset + epsilon < start
+                ? start
+                : (offset + epsilon < end ? end : null))
+          : (offset - epsilon > end
+                ? end
+                : (offset - epsilon > start ? start : null));
+
+      if (candidate == null) {
+        return;
+      }
+
+      if (nearest == null ||
+          (increasing ? candidate < nearest! : candidate > nearest!)) {
+        nearest = candidate;
+      }
+    });
+
+    return nearest;
+  }
+
+  /// The list sliver that hosts marquee items.
+  RenderSliverMultiBoxAdaptor? _findItemSliver() {
+    if (!scrollController.hasClients) {
+      return null;
+    }
+
+    final root = scrollController.position.context.storageContext
+        .findRenderObject();
+
+    if (root == null) {
+      return null;
+    }
+
+    RenderSliverMultiBoxAdaptor? found;
+
+    void visit(RenderObject node) {
+      if (found != null) {
+        return;
+      }
+
+      if (node is RenderSliverMultiBoxAdaptor) {
+        found = node;
+        return;
+      }
+
+      node.visitChildren(visit);
+    }
+
+    visit(root);
+    return found;
   }
 
   /// Enables or disables user interaction
@@ -724,8 +940,11 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       });
     }
 
-    // Restart animation when speed changes (only meaningful if running).
-    if (!directionChanged && widget.pps != oldWidget.pps && animating) {
+    // Restart animation when speed or the item pause changes.
+    if (!directionChanged &&
+        animating &&
+        (widget.pps != oldWidget.pps ||
+            widget.pauseDuration != oldWidget.pauseDuration)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && animating) {
           stop();
