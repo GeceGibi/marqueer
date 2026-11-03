@@ -62,7 +62,7 @@ class Marqueer extends StatefulWidget {
   /// [interactionsChangesAnimationDirection] - Interactions change direction
   /// [edgeDuration] - Finite only. Rest at the start and the far end
   /// (default: zero)
-  /// [pauseDuration] - Rest each time an item lines up with the start
+  /// [itemAlignDuration] - Rest each time an item lines up with the start
   /// edge (default: zero)
   /// [intrinsicCrossAxisSize] - Auto-size cross axis (default: false)
   Marqueer({
@@ -86,7 +86,7 @@ class Marqueer extends StatefulWidget {
     this.scrollablePointerIgnoring = false,
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
-    this.pauseDuration = .zero,
+    this.itemAlignDuration = .zero,
     this.clipBehavior = .hardEdge,
     this.intrinsicCrossAxisSize = false,
     super.key,
@@ -150,7 +150,7 @@ class Marqueer extends StatefulWidget {
   /// [interactionsChangesAnimationDirection] - Interactions change direction
   /// [edgeDuration] - Finite only. Rest at the start and the far end
   /// (default: zero)
-  /// [pauseDuration] - Rest each time an item lines up with the start
+  /// [itemAlignDuration] - Rest each time an item lines up with the start
   /// edge (default: zero)
   /// [intrinsicCrossAxisSize] - Auto-size cross axis (default: false)
   Marqueer.builder({
@@ -174,7 +174,7 @@ class Marqueer extends StatefulWidget {
     this.scrollablePointerIgnoring = false,
     this.interactionsChangesAnimationDirection = true,
     this.edgeDuration = .zero,
-    this.pauseDuration = .zero,
+    this.itemAlignDuration = .zero,
     this.clipBehavior = .hardEdge,
     this.intrinsicCrossAxisSize = false,
     super.key,
@@ -285,14 +285,13 @@ class Marqueer extends StatefulWidget {
   /// [Duration.zero] does not wait. Infinite marquees ignore this value.
   final Duration edgeDuration;
 
-  /// How long to rest each time an item lines up with the start edge.
+  /// How long to rest each time an item's content lines up with the start.
   ///
-  /// The scroll moves until the next item's leading edge reaches the side
-  /// it is moving toward, holds, then continues. A long title uses about
-  /// one second: the text scrolls, rests when the repeated title is back
-  /// at the start, and repeats. Put the gap between copies in
-  /// `separatorBuilder`. [Duration.zero] never holds.
-  final Duration pauseDuration;
+  /// The opening wait is [autoStartAfter]. This duration starts on the next
+  /// copy, so the first item does not pause again just because it reaches
+  /// the start. Outer [padding] and padding inside the item are part of
+  /// that distance. [Duration.zero] never holds.
+  final Duration itemAlignDuration;
 
   /// How this marquee participates in hit testing.
   final HitTestBehavior hitTestBehavior;
@@ -478,7 +477,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
 
     const gap = Duration(milliseconds: 50);
     final edge = _pauseOnEdge ? widget.edgeDuration : Duration.zero;
-    final pause = _pauseOnArrival ? widget.pauseDuration : Duration.zero;
+    final pause = _pauseOnArrival ? widget.itemAlignDuration : Duration.zero;
 
     timerLoop?.cancel();
     timerLoop = Timer(
@@ -505,7 +504,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
   /// Calculates the next scroll position.
   ///
   /// Returns null when there is no valid position. A non-zero
-  /// [Marqueer.pauseDuration] stops the step on the next item.
+  /// [Marqueer.itemAlignDuration] stops the step on the next item.
   double? getNextPosition() {
     final ScrollController(:offset, :position) = scrollController;
     final maxScrollExtent = position.maxScrollExtent;
@@ -571,12 +570,12 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     return target;
   }
 
-  /// Stops [target] on the next item when [Marqueer.pauseDuration] is set.
+  /// Stops [target] on the next item when [Marqueer.itemAlignDuration] is set.
   ///
   /// Item pitch comes from the sliver child already laid out (child plus
   /// separator). The 10000px step stays in place when the pause is disabled.
   double _limitToItemBoundary(double offset, double target) {
-    if (widget.pauseDuration == Duration.zero) {
+    if (widget.itemAlignDuration == Duration.zero) {
       _pauseOnArrival = false;
       return target;
     }
@@ -602,7 +601,10 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     return boundary;
   }
 
-  /// Nearest item edge in front of [offset], in scroll coordinates.
+  /// Nearest content start in front of [offset], in scroll coordinates.
+  ///
+  /// The first item's own start is skipped while the scroll is still there.
+  /// [autoStartAfter] already waits at that position.
   double? _nextItemBoundary(double offset, {required bool increasing}) {
     final sliver = _findItemSliver();
 
@@ -611,8 +613,10 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     }
 
     final origin = sliver.constraints.precedingScrollExtent;
+    final axis = sliver.constraints.axis;
+    final axisDirection = sliver.constraints.axisDirection;
     const epsilon = 0.5;
-    double? nearest;
+    final items = <({double content, double next})>[];
 
     sliver.visitChildren((child) {
       if (child is! RenderBox || !child.hasSize) {
@@ -625,7 +629,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
         return;
       }
 
-      final extent = switch (sliver.constraints.axis) {
+      final extent = switch (axis) {
         Axis.horizontal => child.size.width,
         Axis.vertical => child.size.height,
       };
@@ -635,27 +639,101 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
       }
 
       final start = origin + layout;
-      final end = start + extent;
-
-      final candidate = increasing
-          ? (offset + epsilon < start
-                ? start
-                : (offset + epsilon < end ? end : null))
-          : (offset - epsilon > end
-                ? end
-                : (offset - epsilon > start ? start : null));
-
-      if (candidate == null) {
-        return;
-      }
-
-      if (nearest == null ||
-          (increasing ? candidate < nearest! : candidate > nearest!)) {
-        nearest = candidate;
-      }
+      final inset = _leadingInset(child, axis, axisDirection);
+      items.add((content: start + inset, next: start + extent + inset));
     });
 
+    if (items.isEmpty) {
+      return null;
+    }
+
+    final firstContent = items
+        .map((item) => item.content)
+        .reduce((a, b) => a < b ? a : b);
+    final stillAtOpening = offset <= firstContent + epsilon;
+    double? nearest;
+
+    void consider(double candidate) {
+      final opening =
+          stillAtOpening && (candidate - firstContent).abs() <= epsilon;
+
+      if (increasing) {
+        if (opening || candidate <= offset + epsilon) {
+          return;
+        }
+        if (nearest == null || candidate < nearest!) {
+          nearest = candidate;
+        }
+      } else if (!opening && candidate < offset - epsilon) {
+        if (nearest == null || candidate > nearest!) {
+          nearest = candidate;
+        }
+      }
+    }
+
+    for (final item in items) {
+      consider(item.content);
+      consider(item.next);
+    }
+
     return nearest;
+  }
+
+  /// Distance from the item edge to the colored box, along the scroll.
+  ///
+  /// Padding inside that box stays part of the box, so the pause lines up
+  /// with the box instead of the text. Without a box, the padding before
+  /// the content is used.
+  double _leadingInset(RenderBox box, Axis axis, AxisDirection axisDirection) {
+    final textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+    final reversed = axisDirectionIsReversed(axisDirection);
+    double? boxEdge;
+
+    double leadingOf(RenderPadding padding) {
+      final resolved = padding.padding.resolve(textDirection);
+      return switch (axis) {
+        Axis.horizontal => reversed ? resolved.right : resolved.left,
+        Axis.vertical => reversed ? resolved.bottom : resolved.top,
+      };
+    }
+
+    double walk(RenderBox? current, double at) {
+      if (current == null || !current.hasSize) {
+        return at;
+      }
+
+      if (_paintsBox(current)) {
+        boxEdge = at;
+      }
+
+      if (current is RenderPadding) {
+        return walk(current.child, at + leadingOf(current));
+      }
+
+      if (current is RenderFlex && current.direction == axis) {
+        final leading = reversed ? current.lastChild : current.firstChild;
+        return walk(leading, at);
+      }
+
+      if (current is RenderProxyBox) {
+        return walk(current.child, at);
+      }
+
+      return at;
+    }
+
+    final contentEdge = walk(box, 0);
+    return boxEdge ?? contentEdge;
+  }
+
+  /// A colored or decorated box. Its own padding is inside the pause edge.
+  bool _paintsBox(RenderBox box) {
+    if (box is RenderDecoratedBox) {
+      return true;
+    }
+
+    final name = box.runtimeType.toString();
+    return name.contains('Colored') || name.contains('Decorated');
   }
 
   /// The list sliver that hosts marquee items.
@@ -944,7 +1022,7 @@ class _MarqueerState extends State<Marqueer> with WidgetsBindingObserver {
     if (!directionChanged &&
         animating &&
         (widget.pps != oldWidget.pps ||
-            widget.pauseDuration != oldWidget.pauseDuration)) {
+            widget.itemAlignDuration != oldWidget.itemAlignDuration)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && animating) {
           stop();

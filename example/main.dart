@@ -75,7 +75,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
             height: 48,
             child: Marqueer(
               pps: 40,
-              pauseDuration: const Duration(seconds: 1),
+              itemAlignDuration: const Duration(seconds: 1),
               separatorBuilder: (_, _) => const SizedBox(width: 64),
               child: const Text(
                 'Long song title pauses when it comes back',

@@ -14,7 +14,7 @@ void main() {
           child: Marqueer(
             controller: controller,
             pps: 1000,
-            pauseDuration: const Duration(seconds: 1),
+            itemAlignDuration: const Duration(seconds: 1),
             child: const SizedBox(width: 300, height: 20),
           ),
         ),
@@ -38,6 +38,63 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 100));
     expect(controller.offset, greaterThan(350));
+  });
+
+  testWidgets('opening padding is not a second pause', (tester) async {
+    final controller = MarqueerController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 120,
+            height: 40,
+            child: Marqueer(
+              controller: controller,
+              pps: 1000,
+              padding: const EdgeInsets.only(left: 40),
+              itemAlignDuration: const Duration(seconds: 5),
+              child: const ColoredBox(
+                color: Colors.black,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 28),
+                  child: ColoredBox(
+                    color: Colors.blue,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 16),
+                      child: SizedBox(width: 200, height: 20),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    var elapsed = 0;
+    while (controller.offset < 100 && elapsed < 2000) {
+      await tester.pump(const Duration(milliseconds: 50));
+      elapsed += 50;
+    }
+
+    expect(controller.offset, greaterThan(100));
+
+    // Marquee padding 40, black gap 28, colored box, then the next copy.
+    // The 16px inside the colored box stays on screen.
+    while (controller.offset < 311 && elapsed < 4000) {
+      await tester.pump(const Duration(milliseconds: 50));
+      elapsed += 50;
+    }
+
+    expect(controller.offset, closeTo(312, 1));
+
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(controller.offset, closeTo(312, 1));
   });
 
   testWidgets('zero pause keeps scrolling through the item edge', (

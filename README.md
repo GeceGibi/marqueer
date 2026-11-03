@@ -11,12 +11,12 @@ With support for infinite scrolling, dynamic item generation, and highly customi
 - **Directional Scrolling**: Scroll content in any direction—right-to-left, left-to-right, top-to-bottom, or bottom-to-top.
 - **Infinite or Finite Scrolling**: Display unlimited content or stop after a specific item count.
 - **Customizable Speed**: Control scroll speed with a `pps` (pixels per second) parameter.
-- **Item Pause**: `pauseDuration` holds the marquee each time an item lines up with the start of the scroll, then continues. Use it for a long title that should rest for a moment on every loop.
+- **Item Align**: `itemAlignDuration` holds the marquee when the next item's content box lines up with the start of the scroll, then continues. It does not run for the first item. The opening wait is `autoStartAfter`.
 - **Finite Edge Rest**: `edgeDuration` rests a finite marquee at the start and at the far end. Infinite marquees ignore it.
 - **Interactive Control**: Pause and resume scrolling based on user interactions.
 - **Dynamic Content**: Use the `builder` constructor for generating items dynamically.
 - **Responsive**: Automatically adapts to screen size changes and other layout updates.
-- **Stable Animation**: The loop keeps running when the parent rebuilds with `setState`. It restarts when `pps`, `direction`, or `pauseDuration` changes.
+- **Stable Animation**: The loop keeps running when the parent rebuilds with `setState`. It restarts when `pps`, `direction`, or `itemAlignDuration` changes.
 
 ---
 
@@ -66,7 +66,7 @@ With support for infinite scrolling, dynamic item generation, and highly customi
 
 - `controller`: An optional `MarqueerController` to programmatically control the marquee (e.g., start, stop, change direction, or animate to position).
 - `edgeDuration`: How long a finite marquee rests after it arrives at the start or the far end. It is ignored while `infinity` is true. `Duration.zero` does not wait.
-- `pauseDuration`: How long to rest each time an item's leading edge lines up with the side the marquee is moving toward. `Duration.zero` never holds. A long title uses about `Duration(seconds: 1)`: the text scrolls, rests when the next copy is back at the start, then continues. Use `separatorBuilder` for the gap between copies.
+- `itemAlignDuration`: How long to rest when the next item's content box lines up with the side the marquee is moving toward. It does not apply to the first item; use `autoStartAfter` for that opening wait. Padding inside the content box stays visible. Padding before the box, and the marquee `padding`, are part of the distance. `Duration.zero` never holds. A long title uses about `Duration(seconds: 1)`. Use `separatorBuilder` for the gap between copies.
 - `clipBehavior`: Controls how the content is clipped. Default is `Clip.hardEdge`.
 - `intrinsicCrossAxisSize`: Auto-sizes the cross axis based on child widget. No need for `SizedBox` wrapper. Default is `false`.
 
@@ -186,7 +186,7 @@ SizedBox(
   height: 48,
   child: Marqueer(
     pps: 40,
-    pauseDuration: const Duration(seconds: 1),
+    itemAlignDuration: const Duration(seconds: 1),
     separatorBuilder: (_, _) => const SizedBox(width: 48),
     child: const Text('Long song title pauses when it comes back'),
   ),

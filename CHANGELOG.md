@@ -1,3 +1,8 @@
+## 2.7.0
+Renamed `pauseDuration` to `itemAlignDuration`. \
+`itemAlignDuration` does not run for the first item. The opening wait is `autoStartAfter`. The hold starts when the next item's content lines up with the start of the scroll. \
+The align point is the content box. Padding inside that box stays visible. Padding before the box, and the marquee `padding`, count toward the distance.
+
 ## 2.6.0
 Added `pauseDuration`. When an item's leading edge reaches the start of the scroll, the marquee holds for that duration and then continues. `Duration.zero` keeps the previous continuous scroll. A long title scrolls, rests for about a second once the next copy lines up, and repeats. \
 `edgeDuration` now waits only after a finite marquee arrives at the start or the end. Infinite marquees ignore it.
